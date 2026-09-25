@@ -1,0 +1,78 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 4367 >>
+stream
+BT /F2 20 Tf 50 740 Td (Yamin Hossain) Tj ET
+BT /F1 12 Tf 50 722 Td (AI-Native Software Engineer | LangGraph) Tj ET
+BT /F1 9.5 Tf 50 706 Td (Rajshahi, Bangladesh  |  +880-01706960268  |  Email: contact@yamin.dev  |  GitHub: github.com/yamin  |  LinkedIn: linkedin.com/in/yamin) Tj ET
+BT /F1 9 Tf 50 680 Td (AI-Native Software Engineer specializing in production LLM agents, LangGraph pipelines, and RAG systems.) Tj ET
+BT /F1 9 Tf 50 668 Td (Ships complete products end-to-end with production reliability practices: async queuing, exponential backoff,) Tj ET
+BT /F1 9 Tf 50 656 Td (and observable multi-agent pipelines. Ready to own hard problems from day one on early-stage remote teams.) Tj ET
+BT /F2 11 Tf 50 634 Td (SKILLS) Tj ET
+BT /F1 9 Tf 50 620 Td (AI & Agents: LangGraph, LangChain, RAG pipeline, pgvector, Prompt Engineering, Tool Calling, Guardrails) Tj ET
+BT /F1 9 Tf 50 608 Td (Frontend: React.js, Next.js, TypeScript, Tailwind CSS, HTML, CSS, Zustand) Tj ET
+BT /F1 9 Tf 50 596 Td (Backend: Python, FastAPI, Node.js, Express.js, TypeScript, BullMQ, REST APIs, WebSocket, SSE) Tj ET
+BT /F1 9 Tf 50 584 Td (Databases: PostgreSQL, Prisma ORM, Redis, Neon, MySQL) Tj ET
+BT /F1 9 Tf 50 572 Td (Infrastructure: Docker, Vercel, Render, Turborepo, Git & GitHub, CI/CD pipeline) Tj ET
+BT /F2 11 Tf 50 550 Td (PROJECTS) Tj ET
+BT /F2 10 Tf 50 536 Td (PR REVIEW AGENT - Full Stack Web Application \(June 2026 - Present\)) Tj ET
+BT /F1 8.5 Tf 50 524 Td (Personal Project | Live Demo | GitHub) Tj ET
+BT /F1 8.5 Tf 60 510 Td (- Built a GitHub App \(Marketplace-installable\) that ingests 6 months of merged PR history and posts inline) Tj ET
+BT /F1 8.5 Tf 60 498 Td (  review comments referencing specific past decisions not generic rules making team knowledge searchable.) Tj ET
+BT /F1 8.5 Tf 60 486 Td (- Designed a 6-node LangGraph pipeline with chunked diff processing and pgvector cosine similarity search) Tj ET
+BT /F1 8.5 Tf 60 474 Td (  across 384-dimensional embeddings, surfacing decisions like 'team rejected this in PR #234'.) Tj ET
+BT /F1 8.5 Tf 60 462 Td (- Architected webhook -> BullMQ/Redis queue -> FastAPI inference layer -> Next.js dashboard with) Tj ET
+BT /F1 8.5 Tf 60 450 Td (  exponential backoff, rollback handling, and structured logging for incident traceability.) Tj ET
+BT /F1 8 Tf 50 438 Td (Tech: Next.js, TypeScript, Node.js, Express.js, Python, FastAPI, LangGraph, LangChain, pgvector, PostgreSQL, BullMQ, Redis, Docker) Tj ET
+BT /F2 10 Tf 50 416 Td (BUG REPRODUCER - Autonomous End-to-End Debugging API Service \(Feb 2026 - Present\)) Tj ET
+BT /F1 8.5 Tf 50 404 Td (Personal Project | Live Demo | GitHub) Tj ET
+BT /F1 8.5 Tf 60 390 Td (- Built an autonomous agent that takes a GitHub issue URL, reproduces the bug, writes a failing test,) Tj ET
+BT /F1 8.5 Tf 60 378 Td (  generates a fix, and opens a PR completing the full debugging cycle without human intervention.) Tj ET
+BT /F1 8.5 Tf 60 366 Td (- Designed a 7-node LangGraph pipeline with conditional retry logic: when a test fails for the wrong reason,) Tj ET
+BT /F1 8.5 Tf 60 354 Td (  the agent parses the error output and rewrites the test using that context rather than retrying blindly.) Tj ET
+BT /F1 8 Tf 50 342 Td (Tech: Next.js, TypeScript, Node.js, Express.js, Python, FastAPI, LangChain, LangGraph, PostgreSQL, Prisma, BullMQ, Docker) Tj ET
+BT /F2 11 Tf 50 320 Td (CONTRIBUTION) Tj ET
+BT /F2 9.5 Tf 50 306 Td (Remotion - React framework for programmatic video creation \(52.6k+ GitHub stars\) remotion.dev) Tj ET
+BT /F1 8.5 Tf 60 292 Td (- Added preserveSilence option to renderMediaOnWeb\(\), ensuring silent head/tail frames are retained in the) Tj ET
+BT /F1 8.5 Tf 60 280 Td (  output file fixing timing misalignment when feeding exports into ASR transcription pipelines. \(PR #7074\)) Tj ET
+BT /F1 8.5 Tf 60 268 Td (- Extended playbackRate validation in @remotion/player from +-4 to +-10 to match modern browser capabilities \(PR #7107\)) Tj ET
+BT /F1 8 Tf 50 256 Td (Tech: TypeScript, React, Web Audio API, Bun) Tj ET
+BT /F2 11 Tf 50 234 Td (EDUCATION) Tj ET
+BT /F2 9.5 Tf 50 220 Td (Varendra University \(Oct 2022 - Mar 2026\)) Tj ET
+BT /F1 8.5 Tf 50 208 Td (Bachelor of Engineering - Electrical and Electronic Engineering) Tj ET
+0.8 G 50 698 m 562 698 l S
+0.2 G 50 630 m 562 630 l S
+0.2 G 50 546 m 562 546 l S
+0.2 G 50 316 m 562 316 l S
+0.2 G 50 230 m 562 230 l S
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000004670 00000 n 
+0000004740 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+4815
+%%EOF
