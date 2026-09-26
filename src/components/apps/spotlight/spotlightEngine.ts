@@ -104,7 +104,7 @@ export function evaluateMathExpression(expr: string): string | null {
   }
 
   try {
-    let sanitized = trimmed
+    const sanitized = trimmed
       .replace(/pi/g, String(Math.PI))
       .replace(/\be\b/g, String(Math.E))
       .replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)')
@@ -263,7 +263,6 @@ export function querySpotlight({
       } else {
         const isImage = entry.kind === 'image'
         const isPdf = entry.kind === 'pdf'
-        const isDoc = entry.kind === 'markdown' || entry.kind === 'text' || isPdf
 
         const kindLabel = isImage ? 'JPEG image' : isPdf ? 'PDF document' : 'Document'
         const sizeLabel = entry.size || '1.2 MB'

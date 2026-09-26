@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HardDrive, Info, Eye, Copy, Download, FolderPlus, Terminal as TerminalIcon, Sparkles, RefreshCw, X } from 'lucide-react'
+import { Info, Eye, Copy, Download, FolderPlus, Terminal as TerminalIcon, Sparkles, RefreshCw, X } from 'lucide-react'
 import { useWindowStore, ACCENT_COLOR_MAP } from '@/app/store/windowStore'
 import { soundEngine } from '@/lib/sound/soundEngine'
 import { FinderFileIcon } from '@/components/apps/finder/FinderFileIcon'
@@ -241,8 +241,8 @@ export default function DesktopIcons() {
     const maxRows = Math.max(1, Math.floor((screenH - TOP_MARGIN - 80) / GRID_HEIGHT))
     const row = Math.max(0, Math.min(maxRows - 1, rawRow))
 
-    let snappedX = screenW - RIGHT_MARGIN - GRID_WIDTH - col * colSpacing
-    let snappedY = TOP_MARGIN + row * GRID_HEIGHT
+    const snappedX = screenW - RIGHT_MARGIN - GRID_WIDTH - col * colSpacing
+    const snappedY = TOP_MARGIN + row * GRID_HEIGHT
 
     // Check if cell is occupied by another icon
     const isOccupied = (tx: number, ty: number) => {
@@ -296,6 +296,33 @@ export default function DesktopIcons() {
     return () => window.removeEventListener('resize', handleResize)
   }, [getDefaultPos, snapToGrid])
 
+  // ── Action: Open Desktop Item ────────────────────────────────────────────────
+  const handleOpenItem = useCallback((item: DesktopIconItem) => {
+    soundEngine.play('pop')
+    setContextMenu({ visible: false, x: 0, y: 0, item: null })
+
+    switch (item.id) {
+      case 'dt-mac-hd':
+        openFinderFile('/Users/yamin')
+        break
+      case 'dt-projects':
+        openFinderFile('/Users/yamin/03_Production_AI_Agents')
+        break
+      case 'dt-resume':
+        openApp('resume')
+        break
+      case 'dt-about':
+        openFinderFile('Bio & Engineering Journey.md')
+        break
+      case 'dt-pr-review':
+        openFinderFile('03_Production_AI_Agents/pr-review-agent.md')
+        break
+      default:
+        openFinderFile(item.name)
+        break
+    }
+  }, [openFinderFile, openApp])
+
   // ── Keyboard Shortcuts (Escape to deselect, Enter/Space to open, Arrows to navigate) ──
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -334,34 +361,7 @@ export default function DesktopIcons() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedId])
-
-  // ── Action: Open Desktop Item ────────────────────────────────────────────────
-  const handleOpenItem = (item: DesktopIconItem) => {
-    soundEngine.play('pop')
-    setContextMenu({ visible: false, x: 0, y: 0, item: null })
-
-    switch (item.id) {
-      case 'dt-mac-hd':
-        openFinderFile('/Users/yamin')
-        break
-      case 'dt-projects':
-        openFinderFile('/Users/yamin/03_Production_AI_Agents')
-        break
-      case 'dt-resume':
-        openApp('resume')
-        break
-      case 'dt-about':
-        openFinderFile('Bio & Engineering Journey.md')
-        break
-      case 'dt-pr-review':
-        openFinderFile('03_Production_AI_Agents/pr-review-agent.md')
-        break
-      default:
-        openFinderFile(item.name)
-        break
-    }
-  }
+  }, [selectedId, handleOpenItem])
 
   // ── Native Pointer Drag Engine with Snap-to-Grid on Drop ──────────────────
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, item: DesktopIconItem) => {

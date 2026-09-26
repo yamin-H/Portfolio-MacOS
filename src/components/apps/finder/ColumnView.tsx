@@ -238,25 +238,44 @@ export function ColumnView({
             {selectedItem.isFolder ? 'Folder' : `${selectedItem.kind.toUpperCase()} document`} — {selectedItem.size}
           </div>
 
-          {/* Quick Look Action Button */}
+          {/* Quick Look / Open Action Buttons */}
           {!selectedItem.isFolder && (
-            <button
-              onClick={() => onQuickLook(selectedItem)}
-              style={{
-                width: '100%',
-                padding: '6px 12px',
-                borderRadius: 6,
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E5E7EB',
-                border: 'none',
-                color: textColor,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: 'pointer',
-                marginBottom: 24,
-              }}
-            >
-              Quick Look
-            </button>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
+              {selectedItem.url && (
+                <button
+                  onClick={() => window.open(selectedItem.url, '_blank', 'noopener,noreferrer')}
+                  style={{
+                    width: '100%',
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    backgroundColor: '#007AFF',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Open in Browser
+                </button>
+              )}
+              <button
+                onClick={() => onQuickLook(selectedItem)}
+                style={{
+                  width: '100%',
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E5E7EB',
+                  border: 'none',
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Quick Look
+              </button>
+            </div>
           )}
 
           {/* Metadata Section */}

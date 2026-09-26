@@ -14,7 +14,7 @@ export interface FSEntry {
   id: string
   name: string
   isFolder: boolean
-  kind: 'folder' | 'zip' | 'image' | 'pdf' | 'markdown' | 'code' | 'audio' | 'video' | 'app' | 'text' | 'generic'
+  kind: 'folder' | 'zip' | 'image' | 'pdf' | 'markdown' | 'code' | 'audio' | 'video' | 'app' | 'text' | 'generic' | 'link'
   size: string
   sizeBytes: number
   dateModified: string
@@ -24,6 +24,7 @@ export interface FSEntry {
   appIconSrc?: string
   content?: string
   contentKey?: string
+  url?: string
 }
 
 export const INITIAL_FS_ENTRIES: FSEntry[] = [
@@ -87,18 +88,6 @@ export const INITIAL_FS_ENTRIES: FSEntry[] = [
     dateCreated: 'Jun 15, 2024 at 11:30 AM',
     parentPath: '/Users/yamin',
     tag: 'yellow',
-  },
-  {
-    id: 'root-hiring',
-    name: '06_For_Hiring_Managers',
-    isFolder: true,
-    kind: 'folder',
-    size: '48 KB',
-    sizeBytes: 49152,
-    dateModified: 'Today at 8:00 AM',
-    dateCreated: 'Sep 01, 2024 at 9:00 AM',
-    parentPath: '/Users/yamin',
-    tag: 'gray',
   },
   {
     id: 'root-playgrounds',
@@ -248,58 +237,6 @@ Rajshahi, Bangladesh | +880-01706960268 | Email: contact@yamin.dev
 
 Specializing in production LLM agents, LangGraph pipelines, and RAG systems. Ships complete products end-to-end with production reliability practices async queuing, exponential backoff, and observable multi-agent pipelines.`,
   },
-  {
-    id: 'resume-exec-summary',
-    name: 'Executive_Summary_One_Pager.md',
-    isFolder: false,
-    kind: 'markdown',
-    size: '2.4 KB',
-    sizeBytes: 2457,
-    dateModified: 'Yesterday at 6:00 PM',
-    dateCreated: 'Mar 10, 2024 at 11:00 AM',
-    parentPath: '/Users/yamin/02_Resume_&_Credentials',
-    tag: 'red',
-    content: `# Yamin Hossain — Executive One-Pager
-
-### What I Do Best
-I turn complex autonomous AI agent architectures into reliable, production-ready software.
-
-### Highlights
-1. **PR Review Agent:** Marketplace GitHub App indexing 6 months of team PR history. 6-node LangGraph pipeline with pgvector semantic similarity, cutting code review latency from hours to 85 seconds.
-2. **Autonomous Bug Reproducer:** End-to-end agent reproducing GitHub issue bugs, generating failing tests, rewriting them conditionally upon error feedback, and opening automated fix PRs.
-3. **Remotion Open Source:** Core contributions to Remotion (52.6k+ stars) across media rendering and audio sync pipelines.
-
-### Availability
-- **Status:** Immediately available for early-stage and high-growth remote engineering teams.`,
-  },
-  {
-    id: 'resume-cert',
-    name: 'DeepLearning_AI_LangGraph_Cert.pdf',
-    isFolder: false,
-    kind: 'pdf',
-    size: '124 KB',
-    sizeBytes: 126976,
-    dateModified: 'Aug 18, 2024 at 3:15 PM',
-    dateCreated: 'Aug 18, 2024 at 3:15 PM',
-    parentPath: '/Users/yamin/02_Resume_&_Credentials',
-    tag: 'green',
-    content: `DeepLearning.AI Certificate of Completion: Advanced Multi-Agent Systems with LangGraph.
-Covers state graphs, cyclical graphs, human-in-the-loop memory checkpoints, and tool routing.`,
-  },
-  {
-    id: 'resume-transcript',
-    name: 'Academic_Transcript_BEng.pdf',
-    isFolder: false,
-    kind: 'pdf',
-    size: '210 KB',
-    sizeBytes: 215040,
-    dateModified: 'Jul 20, 2024 at 10:00 AM',
-    dateCreated: 'Jul 20, 2024 at 10:00 AM',
-    parentPath: '/Users/yamin/02_Resume_&_Credentials',
-    content: `Varendra University — Official Academic Record
-Department of Electrical and Electronic Engineering (EEE)
-Demonstrated strong foundations in discrete mathematics, control systems, signal processing, and computing architectures.`,
-  },
 
   // ─── 03_Production_AI_Agents ─────────────────────────────────────────────
   {
@@ -307,8 +244,8 @@ Demonstrated strong foundations in discrete mathematics, control systems, signal
     name: 'PR-Review-Agent',
     isFolder: true,
     kind: 'folder',
-    size: '6.4 MB',
-    sizeBytes: 6710886,
+    size: '2 items',
+    sizeBytes: 278,
     dateModified: 'Today at 11:00 AM',
     dateCreated: 'Jun 10, 2024 at 2:00 PM',
     parentPath: '/Users/yamin/03_Production_AI_Agents',
@@ -319,8 +256,8 @@ Demonstrated strong foundations in discrete mathematics, control systems, signal
     name: 'Autonomous-Bug-Reproducer',
     isFolder: true,
     kind: 'folder',
-    size: '4.8 MB',
-    sizeBytes: 5033164,
+    size: '2 items',
+    sizeBytes: 310,
     dateModified: 'Yesterday at 5:10 PM',
     dateCreated: 'Feb 15, 2024 at 10:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents',
@@ -331,209 +268,126 @@ Demonstrated strong foundations in discrete mathematics, control systems, signal
     name: 'Portfolio-OS',
     isFolder: true,
     kind: 'folder',
-    size: '3.6 MB',
-    sizeBytes: 3774873,
+    size: '2 items',
+    sizeBytes: 282,
     dateModified: 'Today at 9:15 AM',
     dateCreated: 'Jan 01, 2024 at 12:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents',
     tag: 'purple',
   },
 
-  // ─── PR-Review-Agent Subfolder ───────────────────────────────────────────
+  // ─── PR-Review-Agent Subfolder (2 Files: GitHub Link & Live Demo) ────────
   {
-    id: 'pr-readme',
-    name: 'README.md',
+    id: 'pr-github-link',
+    name: 'GitHub Repository.url',
     isFolder: false,
-    kind: 'markdown',
-    size: '6.8 KB',
-    sizeBytes: 6963,
+    kind: 'link',
+    size: '142 B',
+    sizeBytes: 142,
     dateModified: 'Today at 10:30 AM',
     dateCreated: 'Jun 10, 2024 at 2:00 PM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/PR-Review-Agent',
     tag: 'blue',
-    content: `# PR Review Agent — Production GitHub App
+    url: 'https://github.com/yamin-H/ai-pr-reviewer-yamin',
+    content: `[InternetShortcut]
+URL=https://github.com/yamin-H/ai-pr-reviewer-yamin
 
-Marketplace-installable GitHub App that ingests 6 months of team PR history and posts inline review comments referencing specific past team decisions — not generic lint rules.
-
-### Key Capabilities:
-- **Historical Memory:** Ingests merged PR discussions, rejects, and design compromises.
-- **Precision Comments:** Surfaces past decisions like *"Your team rejected this pattern in PR #234 because of connection pool exhaustion."*
-- **6-Node LangGraph Pipeline:** Diff chunking, semantic similarity retrieval via pgvector, multi-perspective code evaluation, commentary synthesis, and GitHub PR inline posting.
-- **Latency & Reliability:** Median response time of 85 seconds, powered by BullMQ queuing and exponential backoff retry policies.`,
+Title: PR Review Agent (GitHub Repository)
+Description: Marketplace-installable GitHub App that ingests team PR history and posts inline review comments referencing past team decisions.`,
   },
   {
-    id: 'pr-pipeline-graph',
-    name: 'pipeline_architecture.ts',
+    id: 'pr-live-demo',
+    name: 'Live Demo.url',
     isFolder: false,
-    kind: 'code',
-    size: '4.2 KB',
-    sizeBytes: 4300,
-    dateModified: 'Today at 9:00 AM',
-    dateCreated: 'Jun 12, 2024 at 11:00 AM',
+    kind: 'link',
+    size: '136 B',
+    sizeBytes: 136,
+    dateModified: 'Today at 11:00 AM',
+    dateCreated: 'Jun 10, 2024 at 2:00 PM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/PR-Review-Agent',
-    content: `import { StateGraph, END, START } from "@langchain/langgraph";
+    tag: 'green',
+    url: 'https://ai-pr-reviewer-yamin.vercel.app/',
+    content: `[InternetShortcut]
+URL=https://ai-pr-reviewer-yamin.vercel.app/
 
-interface AgentState {
-  prUrl: string;
-  diffChunks: string[];
-  historicalContext: Array<{ prId: string; decision: string; similarity: number }>;
-  reviewComments: Array<{ file: string; line: number; comment: string }>;
-  status: "idle" | "parsing" | "indexing" | "synthesizing" | "posted";
-}
-
-export const prReviewWorkflow = new StateGraph<AgentState>({
-  channels: {
-    prUrl: null,
-    diffChunks: { value: (x, y) => y ?? x, default: () => [] },
-    historicalContext: { value: (x, y) => y ?? x, default: () => [] },
-    reviewComments: { value: (x, y) => y ?? x, default: () => [] },
-    status: { value: (x, y) => y ?? x, default: () => "idle" },
-  }
-})
-  .addNode("ingestDiff", async (state) => { /* Tree-sitter diff chunking */ })
-  .addNode("querySimilarDecisions", async (state) => { /* pgvector cosine search */ })
-  .addNode("synthesizeReview", async (state) => { /* Claude 3.5 Sonnet analysis */ })
-  .addNode("postInlineComments", async (state) => { /* GitHub API client */ })
-  .addEdge(START, "ingestDiff")
-  .addEdge("ingestDiff", "querySimilarDecisions")
-  .addEdge("querySimilarDecisions", "synthesizeReview")
-  .addEdge("synthesizeReview", "postInlineComments")
-  .addEdge("postInlineComments", END);`,
-  },
-  {
-    id: 'pr-interactive-app',
-    name: 'Interactive_Visualizer.app',
-    isFolder: false,
-    kind: 'app',
-    size: '1.2 MB',
-    sizeBytes: 1258291,
-    dateModified: 'Today at 10:00 AM',
-    dateCreated: 'Jun 15, 2024 at 3:00 PM',
-    parentPath: '/Users/yamin/03_Production_AI_Agents/PR-Review-Agent',
-    appIconSrc: '/finder.png',
-    contentKey: 'pr-review-agent',
-    content: 'Double-click to launch the live interactive LangGraph Pipeline Visualizer!',
-  },
-  {
-    id: 'pr-benchmark-json',
-    name: 'benchmark_metrics.json',
-    isFolder: false,
-    kind: 'code',
-    size: '1.8 KB',
-    sizeBytes: 1843,
-    dateModified: 'Jul 01, 2024 at 12:00 PM',
-    dateCreated: 'Jul 01, 2024 at 12:00 PM',
-    parentPath: '/Users/yamin/03_Production_AI_Agents/PR-Review-Agent',
-    content: `{
-  "benchmark_suite": "PR Review Agent v2.4",
-  "evaluated_prs": 450,
-  "metrics": {
-    "median_latency_seconds": 84.8,
-    "security_vulnerability_recall": "96.4%",
-    "false_positive_rate": "3.1%",
-    "team_decision_accuracy": "91.8%",
-    "cost_per_reviewed_pr_usd": 0.042
-  }
-}`,
+Title: PR Review Agent (Live Production Demo)
+Description: Live production dashboard and review demo for the PR Review Agent.`,
   },
 
-  // ─── Autonomous-Bug-Reproducer Subfolder ──────────────────────────────────
+  // ─── Autonomous-Bug-Reproducer Subfolder (2 Files: GitHub Link & Live Demo) 
   {
-    id: 'bug-readme',
-    name: 'README.md',
+    id: 'bug-github-link',
+    name: 'GitHub Repository.url',
     isFolder: false,
-    kind: 'markdown',
-    size: '5.4 KB',
-    sizeBytes: 5529,
+    kind: 'link',
+    size: '158 B',
+    sizeBytes: 158,
     dateModified: 'Yesterday at 3:00 PM',
     dateCreated: 'Feb 15, 2024 at 10:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/Autonomous-Bug-Reproducer',
     tag: 'blue',
-    content: `# Autonomous Bug Reproducer
+    url: 'https://github.com/yamin-H/Bug-Reproducer-Autonomous-AI-Agent',
+    content: `[InternetShortcut]
+URL=https://github.com/yamin-H/Bug-Reproducer-Autonomous-AI-Agent
 
-An autonomous debugging service that takes a raw GitHub issue description, sets up an isolated test sandbox, reproduces the bug with a newly authored failing test, synthesizes the fix, and opens a complete Pull Request.
-
-### Key Innovations:
-- **Self-Healing Test Rewriter:** When generated tests fail for environmental or syntactic errors rather than the underlying bug, the agent parses the stderr traceback and re-writes the test before re-evaluating.
-- **7-Node Conditional Graph:** Uses LangGraph conditional edges to branch between code rewriting, dependency resolution, and test harness setup.`,
+Title: Bug Reproducer Autonomous AI Agent (GitHub Repository)
+Description: Autonomous end-to-end debugging API service that reproduces bugs, authors failing tests, and opens verified PRs.`,
   },
   {
-    id: 'bug-code',
-    name: 'self_healing_test_agent.py',
+    id: 'bug-live-demo',
+    name: 'Live Demo.url',
     isFolder: false,
-    kind: 'code',
-    size: '3.8 KB',
-    sizeBytes: 3891,
-    dateModified: 'Yesterday at 2:30 PM',
-    dateCreated: 'Feb 18, 2024 at 1:15 PM',
+    kind: 'link',
+    size: '152 B',
+    sizeBytes: 152,
+    dateModified: 'Yesterday at 3:30 PM',
+    dateCreated: 'Feb 15, 2024 at 10:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/Autonomous-Bug-Reproducer',
-    content: `def route_test_failure(state: BugAgentState) -> str:
-    """Intelligently branch based on test failure diagnostics."""
-    if state["syntax_error_detected"]:
-        return "rewrite_test_ast"
-    elif state["environment_dependency_missing"]:
-        return "install_sandbox_dependency"
-    elif state["bug_reproduced_successfully"]:
-        return "generate_codebase_fix"
-    return "abort_and_log"`,
-  },
-  {
-    id: 'bug-trace',
-    name: 'execution_trace_demo.log',
-    isFolder: false,
-    kind: 'text',
-    size: '2.1 KB',
-    sizeBytes: 2150,
-    dateModified: 'Feb 20, 2024 at 4:00 PM',
-    dateCreated: 'Feb 20, 2024 at 4:00 PM',
-    parentPath: '/Users/yamin/03_Production_AI_Agents/Autonomous-Bug-Reproducer',
-    content: `[2026-02-20T14:02:11Z] [Node: IngestIssue] Ingested GitHub Issue #108: "Memory leak in event listener registration"
-[2026-02-20T14:02:19Z] [Node: AuthorTest] Created tests/reproduce_issue_108.test.ts
-[2026-02-20T14:02:34Z] [Node: RunSandbox] Test exited with code 1 (Failed as expected: 4 listener instances remaining)
-[2026-02-20T14:02:58Z] [Node: FixCode] Applied WeakMap unsubscribe listener pattern to src/eventManager.ts
-[2026-02-20T14:03:14Z] [Node: Verify] Test suite passed cleanly (100% assertions green)
-[2026-02-20T14:03:22Z] [Node: OpenPR] PR #114 created successfully with automated fix and regression test.`,
+    tag: 'green',
+    url: 'https://bug-reproducer-autonomous-ai-agent.vercel.app/',
+    content: `[InternetShortcut]
+URL=https://bug-reproducer-autonomous-ai-agent.vercel.app/
+
+Title: Bug Reproducer (Live Production Demo)
+Description: Live web interface to trigger and observe autonomous bug reproduction and repair cycles.`,
   },
 
-  // ─── Portfolio-OS Subfolder ──────────────────────────────────────────────
+  // ─── Portfolio-OS Subfolder (2 Files: GitHub Link & Live Demo) ───────────
   {
-    id: 'os-arch',
-    name: 'architecture_and_decisions.md',
+    id: 'os-github-link',
+    name: 'GitHub Repository.url',
     isFolder: false,
-    kind: 'markdown',
-    size: '4.6 KB',
-    sizeBytes: 4710,
+    kind: 'link',
+    size: '138 B',
+    sizeBytes: 138,
     dateModified: 'Today at 9:00 AM',
     dateCreated: 'Jan 01, 2024 at 12:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/Portfolio-OS',
-    tag: 'purple',
-    content: `# Portfolio OS — Architecture & Engineering Decisions
+    tag: 'blue',
+    url: 'https://github.com/yamin-H/Portfolio-MacOS',
+    content: `[InternetShortcut]
+URL=https://github.com/yamin-H/Portfolio-MacOS
 
-A fully interactive macOS desktop environment built from first principles on Next.js 16 App Router.
-
-### Architectural Decisions:
-- **Zustand Reactive Store:** Decoupled window management, focus elevation (z-index hierarchy), multitasking state, and system hardware toggles.
-- **Web Audio API Synthesizer:** Zero external audio assets; pop, chime, click, and trash audio synthesized in real time via Web Audio oscillators.
-- **Spring Physics Multitasking:** Framer Motion spring curves powering Mission Control, Stage Manager shelf, App Switcher HUD, and window snapping.`,
+Title: Portfolio OS (GitHub Repository)
+Description: Interactive macOS Sequoia Desktop Environment and Production AI Systems Showcase.`,
   },
   {
-    id: 'os-multitasking',
-    name: 'multitasking_engine.ts',
+    id: 'os-live-demo',
+    name: 'Live Demo.url',
     isFolder: false,
-    kind: 'code',
-    size: '3.2 KB',
-    sizeBytes: 3276,
-    dateModified: 'Today at 8:45 AM',
-    dateCreated: 'Jan 10, 2024 at 10:00 AM',
+    kind: 'link',
+    size: '144 B',
+    sizeBytes: 144,
+    dateModified: 'Today at 9:15 AM',
+    dateCreated: 'Jan 01, 2024 at 12:00 AM',
     parentPath: '/Users/yamin/03_Production_AI_Agents/Portfolio-OS',
-    content: `// macOS Sequoia Tiling & Stage Manager Store Logic
-export const calculateSnapBounds = (screenW: number, screenH: number, type: 'left' | 'right' | 'maximize') => {
-  const topBarH = 28;
-  const usableH = screenH - topBarH - 72;
-  if (type === 'left') return { x: 8, y: topBarH + 6, width: screenW / 2 - 12, height: usableH - 12 };
-  if (type === 'right') return { x: screenW / 2 + 4, y: topBarH + 6, width: screenW / 2 - 12, height: usableH - 12 };
-  return { x: 8, y: topBarH + 6, width: screenW - 16, height: usableH - 12 };
-};`,
+    tag: 'green',
+    url: 'https://portfolio-mac-os-zeta.vercel.app/',
+    content: `[InternetShortcut]
+URL=https://portfolio-mac-os-zeta.vercel.app/
+
+Title: Portfolio OS (Live Production Demo)
+Description: Production deployment of the macOS Sequoia Portfolio OS on Vercel.`,
   },
 
   // ─── 04_Open_Source_Impact ───────────────────────────────────────────────
@@ -637,54 +491,6 @@ Architecting persistent memory for team engineering decisions.
 - **Index Type:** IVFFlat with 100 lists for sub-10ms nearest-neighbor cosine similarity queries across 50,000+ PR diff chunks.`,
   },
 
-  // ─── 06_For_Hiring_Managers ──────────────────────────────────────────────
-  {
-    id: 'hire-why',
-    name: 'Why_Hire_Yamin.md',
-    isFolder: false,
-    kind: 'markdown',
-    size: '3.4 KB',
-    sizeBytes: 3481,
-    dateModified: 'Today at 8:00 AM',
-    dateCreated: 'Sep 01, 2024 at 9:00 AM',
-    parentPath: '/Users/yamin/06_For_Hiring_Managers',
-    tag: 'gray',
-    content: `# Why Hire Yamin Hossain
-
-### 1. Production Focus
-I don't build toy demos that fall over when an API call fails. I implement state machine branching, exponential backoff, and full observability.
-
-### 2. High Velocity & Independence
-I am self-directed, accustomed to remote collaboration across time zones, and capable of taking an ambiguous problem from whiteboard to production deployment.
-
-### 3. Immediate Value
-Deep experience in TypeScript, Python, Next.js, and modern AI pipelines (LangGraph/pgvector) allows me to contribute code from day one.`,
-  },
-  {
-    id: 'hire-30-60-90',
-    name: '30_60_90_Day_Impact_Plan.md',
-    isFolder: false,
-    kind: 'markdown',
-    size: '3.2 KB',
-    sizeBytes: 3276,
-    dateModified: 'Today at 8:15 AM',
-    dateCreated: 'Sep 01, 2024 at 9:15 AM',
-    parentPath: '/Users/yamin/06_For_Hiring_Managers',
-    content: `# 30-60-90 Day Impact Plan
-
-### First 30 Days (Learn & Ship)
-- Immerse in team codebase, deployment pipelines, and coding standards.
-- Ship first bug fix / minor feature within the first 48 hours.
-- Build internal tooling / agent scripts to accelerate team productivity.
-
-### Days 31-60 (Own & Architect)
-- Own major architectural modules in AI agent orchestration or backend queuing.
-- Enhance test coverage and observability monitoring.
-
-### Days 61-90 (Scale & Lead)
-- Proactively identify bottlenecks, optimize latency and cloud infrastructure costs.
-- Mentor peers on LangGraph state management and reliable AI practices.`,
-  },
 
   // ─── 07_Playgrounds_&_Code ───────────────────────────────────────────────
   {

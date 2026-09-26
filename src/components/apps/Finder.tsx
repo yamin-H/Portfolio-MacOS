@@ -279,6 +279,15 @@ export default function Finder() {
       return
     }
 
+    // Direct Link / URL Shortcut: Open in new browser tab!
+    if (item.url || item.kind === 'link') {
+      soundEngine.play('pop')
+      if (item.url) {
+        window.open(item.url, '_blank', 'noopener,noreferrer')
+      }
+      return
+    }
+
     // If Resume.pdf is opened -> Open dedicated macOS Resume.pdf window!
     if (item.name === 'Resume.pdf' || item.id.includes('resume')) {
       soundEngine.play('pop')
@@ -1336,27 +1345,6 @@ export default function Finder() {
                 <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: TAG_COLORS.yellow.hex }} />
               </div>
 
-              {/* 6. For Hiring Managers */}
-              <div
-                onClick={() => navigateTo('/Users/yamin/06_For_Hiring_Managers')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '4px 8px',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  backgroundColor: currentPath === '/Users/yamin/06_For_Hiring_Managers' ? '#007AFF' : 'transparent',
-                  color: currentPath === '/Users/yamin/06_For_Hiring_Managers' ? '#FFFFFF' : '#333',
-                  fontWeight: currentPath === '/Users/yamin/06_For_Hiring_Managers' ? 600 : 400,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <Briefcase size={15} color={currentPath === '/Users/yamin/06_For_Hiring_Managers' ? '#FFFFFF' : '#98989D'} />
-                  <span>For Recruiters</span>
-                </div>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: TAG_COLORS.gray.hex }} />
-              </div>
 
               {/* 7. Downloads */}
               <div
@@ -2223,6 +2211,28 @@ export default function Finder() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {selectedItem.url && (
+                    <button
+                      onClick={() => {
+                        window.open(selectedItem.url, '_blank', 'noopener,noreferrer')
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 4,
+                        fontSize: 11.5,
+                        backgroundColor: '#007AFF',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <ExternalLink size={12} />
+                      <span>Open in Browser</span>
+                    </button>
+                  )}
                   {selectedItem.name === 'Resume.pdf' && (
                     <button
                       onClick={() => {
@@ -2358,7 +2368,76 @@ export default function Finder() {
                   ) ? 0 : 20,
                 }}
               >
-                {quickLookTab === 'visualizer' ? (
+                {selectedItem.url ? (
+                  <div
+                    style={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '24px',
+                      textAlign: 'center',
+                      gap: 16,
+                    }}
+                  >
+                    <FinderFileIcon kind="link" name={selectedItem.name} size={96} />
+                    <div style={{ maxWidth: 480 }}>
+                      <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, color: '#FFFFFF' }}>
+                        {selectedItem.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          color: '#0A84FF',
+                          wordBreak: 'break-all',
+                          fontFamily: 'monospace',
+                          marginBottom: 12,
+                        }}
+                      >
+                        {selectedItem.url}
+                      </div>
+                      {selectedItem.content && (
+                        <div
+                          style={{
+                            fontSize: 12.5,
+                            color: 'rgba(255, 255, 255, 0.75)',
+                            lineHeight: 1.5,
+                            backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                            padding: '12px 16px',
+                            borderRadius: 10,
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            textAlign: 'left',
+                            whiteSpace: 'pre-wrap',
+                          }}
+                        >
+                          {selectedItem.content}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => window.open(selectedItem.url, '_blank', 'noopener,noreferrer')}
+                      style={{
+                        marginTop: 4,
+                        padding: '8px 22px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        backgroundColor: '#007AFF',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: '0 4px 14px rgba(0, 122, 255, 0.35)',
+                      }}
+                    >
+                      <ExternalLink size={14} />
+                      <span>Open Link in Browser</span>
+                    </button>
+                  </div>
+                ) : quickLookTab === 'visualizer' ? (
                   <div style={{ height: '100%' }}>
                     <LangGraphVisualizer />
                   </div>

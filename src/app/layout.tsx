@@ -40,10 +40,11 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" className={`h-full w-full ${inter.variable}`}>
+        <html lang="en" className={`h-full w-full ${inter.variable}`} suppressHydrationWarning>
             <body
                 className="h-full w-full overflow-hidden"
                 style={{ fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                suppressHydrationWarning
             >
                 {children}
             </body>

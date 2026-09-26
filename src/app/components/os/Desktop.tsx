@@ -119,6 +119,7 @@ export default function Desktop() {
     return (
         <div
             data-theme={appearanceMode}
+            suppressHydrationWarning
             style={{
                 width: '100vw',
                 height: '100vh',

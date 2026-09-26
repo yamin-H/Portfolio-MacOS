@@ -16,6 +16,7 @@ export type FileKind =
   | 'app'
   | 'text'
   | 'generic'
+  | 'link'
 
 interface FinderFileIconProps {
   kind: FileKind
@@ -67,6 +68,9 @@ export function FinderFileIcon({
   const isCode = kind === 'code'
   const isImg = kind === 'image'
   const isTxt = kind === 'text'
+  const isLink = kind === 'link' || Boolean(name && (name.endsWith('.url') || name.endsWith('.webloc')))
+  const isGithub = isLink && Boolean(name && name.toLowerCase().includes('github'))
+  const isDemo = isLink && !isGithub
 
   const accentColor = isPdf
     ? '#FF3B30'
@@ -76,6 +80,10 @@ export function FinderFileIcon({
     ? '#AF52DE'
     : isImg
     ? '#34C759'
+    : isGithub
+    ? '#24292F'
+    : isDemo
+    ? '#007AFF'
     : '#8E8E93'
 
   const extensionLabel = isPdf
@@ -88,6 +96,8 @@ export function FinderFileIcon({
     ? 'IMG'
     : isTxt
     ? 'TXT'
+    : isLink
+    ? 'URL'
     : 'DOC'
 
   return (
@@ -177,7 +187,27 @@ export function FinderFileIcon({
         </g>
       )}
 
-      {!isPdf && !isMd && !isCode && !isImg && (
+      {isGithub && (
+        <g transform="translate(22, 50)">
+          <rect width="36" height="28" rx="6" fill="#24292F" />
+          <path
+            d="M18 6C13.58 6 10 9.58 10 14C10 17.54 12.29 20.53 15.47 21.6C15.87 21.67 16.02 21.42 16.02 21.21C16.02 21.02 16.01 20.41 16.01 19.73C13.78 20.21 13.31 18.76 13.31 18.76C12.95 17.84 12.43 17.59 12.43 17.59C11.7 17.09 12.49 17.1 12.49 17.1C13.3 17.16 13.72 17.94 13.72 17.94C14.44 19.17 15.6 18.81 16.06 18.6C16.13 18.08 16.34 17.72 16.57 17.52C14.79 17.32 12.92 16.63 12.92 13.58C12.92 12.71 13.23 12.01 13.74 11.45C13.66 11.25 13.39 10.45 13.82 9.35C13.82 9.35 14.49 9.14 16.01 10.17C16.65 9.99 17.33 9.9 18.01 9.9C18.69 9.9 19.37 9.99 20.01 10.17C21.53 9.14 22.2 9.35 22.2 9.35C22.63 10.45 22.36 11.25 22.28 11.45C22.79 12.01 23.1 12.71 23.1 13.58C23.1 16.64 21.22 17.32 19.43 17.52C19.73 17.77 19.99 18.28 19.99 19.05C19.99 20.15 19.98 21.04 19.98 21.21C19.98 21.42 20.13 21.68 20.54 21.6C23.71 20.53 26 17.53 26 14C26 9.58 22.42 6 18 6Z"
+            fill="#FFFFFF"
+          />
+        </g>
+      )}
+
+      {isDemo && (
+        <g transform="translate(22, 50)">
+          <rect width="36" height="28" rx="6" fill="#007AFF" />
+          <circle cx="18" cy="14" r="8" stroke="#FFFFFF" strokeWidth="1.2" fill="none" />
+          <ellipse cx="18" cy="14" rx="3.8" ry="8" stroke="#FFFFFF" strokeWidth="1" fill="none" />
+          <line x1="10" y1="14" x2="26" y2="14" stroke="#FFFFFF" strokeWidth="1" />
+          <circle cx="24" cy="8" r="2.5" fill="#30D158" stroke="#007AFF" strokeWidth="0.8" />
+        </g>
+      )}
+
+      {!isPdf && !isMd && !isCode && !isImg && !isLink && (
         <g transform="translate(24, 54)">
           <text x="16" y="16" textAnchor="middle" fill="#8E8E93" fontSize="9" fontWeight="700" fontFamily="sans-serif">
             {extensionLabel}
