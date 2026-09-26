@@ -332,7 +332,7 @@ The portfolio showcases real systems engineered with an emphasis on reliability,
 *AI-Native Software Engineer · Distributed Systems & Production LLM Pipelines*  
 Rajshahi, Bangladesh · Open to Remote Engineering Teams
 
-- **Portfolio**: [yamin-portfolio-os.vercel.app](https://yamin-portfolio-os.vercel.app)
+- **Portfolio**: [yamin-portfolio-os.vercel.app](https://portfolio-mac-nzintuv7k-yamin-hs-projects.vercel.app/)
 - **Email**: [yamindr3@gmail.com](mailto:yamindr3@gmail.com)
 - **GitHub**: [@yamin-H](https://github.com/yamin-H)
 - **LinkedIn**: [in/yamin-hossain-n](https://www.linkedin.com/in/yamin-hossain-n/)
