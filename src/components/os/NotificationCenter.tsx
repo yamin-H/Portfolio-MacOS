@@ -84,10 +84,10 @@ export default function NotificationCenter() {
 
   const handleCopyEmail = () => {
     soundEngine.play('action')
-    navigator.clipboard.writeText('yamindr@gmail.com')
+    navigator.clipboard.writeText('yamindr3@gmail.com')
     setCopiedEmail(true)
     setTimeout(() => setCopiedEmail(false), 2400)
-    window.location.href = 'mailto:yamindr@gmail.com?subject=Engineering%20Opportunity%20from%20Portfolio'
+    window.location.href = 'mailto:yamindr3@gmail.com?subject=Engineering%20Opportunity%20from%20Portfolio'
   }
 
   const currentDateFormatted = time.toLocaleDateString('en-US', {
@@ -685,7 +685,7 @@ export default function NotificationCenter() {
                 }}
               >
                 <Mail size={14} />
-                <span>{copiedEmail ? 'Copied yamindr@gmail.com!' : 'Email Yamin Hossain'}</span>
+                <span>{copiedEmail ? 'Copied yamindr3@gmail.com!' : 'Email Yamin Hossain'}</span>
               </button>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>

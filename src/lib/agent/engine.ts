@@ -161,14 +161,14 @@ When a new PR opens:
 
 I am currently open to **early-stage remote engineering teams** looking for someone to own AI-native systems, agent pipelines, and high-reliability backend services from day one.
 
-- **Email:** [yamindr@gmail.com](mailto:yamindr@gmail.com)
-- **GitHub:** [github.com/yamin](https://github.com/yamin)
-- **LinkedIn:** [linkedin.com/in/yamin](https://linkedin.com/in/yamin)
+- **Email:** [yamindr3@gmail.com](mailto:yamindr3@gmail.com)
+- **GitHub:** [github.com/yamin-H](https://github.com/yamin-H)
+- **LinkedIn:** [yamin-hossain-n](https://www.linkedin.com/in/yamin-hossain-n/)
 
 Feel free to send an email directly or click the contact badge below!`
 
     const pills: ActionPill[] = [
-      { id: 'mail-yamin', label: 'Email yamindr@gmail.com', icon: 'email', actionType: 'contact', payload: 'yamindr@gmail.com' },
+      { id: 'mail-yamin', label: 'Email yamindr3@gmail.com', icon: 'email', actionType: 'contact', payload: 'yamindr3@gmail.com' },
       { id: 'view-resume-doc', label: 'View Resume in Finder', icon: 'finder', actionType: 'open_file', payload: 'Resume/yamin_resume.pdf' },
       { id: 'run-sudo-hire', label: 'Run sudo hire in Terminal', icon: 'terminal', actionType: 'open_terminal', payload: 'sudo hire yamin' },
     ]

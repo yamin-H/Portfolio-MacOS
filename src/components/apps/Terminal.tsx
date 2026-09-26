@@ -123,8 +123,17 @@ export default function Terminal() {
 
   // ── Auto Scroll ────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    const scrollToBottom = () => {
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight
+      }
+    }
+    scrollToBottom()
+    const rId = requestAnimationFrame(scrollToBottom)
+    const tId = setTimeout(scrollToBottom, 40)
+    return () => {
+      cancelAnimationFrame(rId)
+      clearTimeout(tId)
     }
   }, [lines, inputValue])
 
@@ -576,11 +585,11 @@ export default function Terminal() {
         {lines.map((line) => {
           if (line.type === 'command') {
             return (
-              <div key={line.id} style={{ display: 'flex', alignItems: 'flex-start', wordBreak: 'break-all', minHeight: lineMinHeight }}>
-                <span style={{ color: colors.promptUser, fontWeight: 400 }}>
-                  yamin@Yamins-MacBook-Air {formatPromptPath(line.cwd || '~')} %{' '}
+              <div key={line.id} style={{ display: 'flex', alignItems: 'flex-start', wordBreak: 'break-all', minHeight: lineMinHeight, flexShrink: 0 }}>
+                <span style={{ color: colors.promptUser, fontWeight: 400, whiteSpace: 'pre', flexShrink: 0, marginRight: '8px' }}>
+                  yamin@Yamins-MacBook-Air {formatPromptPath(line.cwd || '~')} %
                 </span>
-                <span style={{ color: colors.text }}>
+                <span style={{ color: colors.text, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {typeof line.content === 'string' ? line.content : line.content}
                 </span>
               </div>
@@ -589,7 +598,7 @@ export default function Terminal() {
 
           if (line.type === 'error') {
             return (
-              <div key={line.id} style={{ color: '#ff6b6b', whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: lineMinHeight }}>
+              <div key={line.id} style={{ color: '#ff6b6b', whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: lineMinHeight, flexShrink: 0 }}>
                 {typeof line.content === 'string' ? line.content : line.content}
               </div>
             )
@@ -597,7 +606,7 @@ export default function Terminal() {
 
           if (line.type === 'system') {
             return (
-              <div key={line.id} style={{ color: 'rgba(215, 215, 220, 0.65)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: lineMinHeight }}>
+              <div key={line.id} style={{ color: 'rgba(215, 215, 220, 0.65)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: lineMinHeight, flexShrink: 0 }}>
                 {typeof line.content === 'string' ? line.content : line.content}
               </div>
             )
@@ -605,7 +614,7 @@ export default function Terminal() {
 
           // Normal output
           return (
-            <div key={line.id} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: colors.text, opacity: 0.92, minHeight: lineMinHeight }}>
+            <div key={line.id} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: colors.text, opacity: 0.92, flexShrink: 0, minHeight: 'fit-content' }}>
               {typeof line.content === 'string' ? line.content : line.content}
             </div>
           )
@@ -615,10 +624,10 @@ export default function Terminal() {
         <div
           onClick={focusInput}
           onPointerDown={focusInput}
-          style={{ display: 'flex', alignItems: 'center', position: 'relative', minHeight: lineMinHeight, cursor: 'text' }}
+          style={{ display: 'flex', alignItems: 'center', position: 'relative', minHeight: lineMinHeight, flexShrink: 0, cursor: 'text' }}
         >
-          <span style={{ color: colors.promptUser, fontWeight: 400, whiteSpace: 'nowrap' }}>
-            yamin@Yamins-MacBook-Air {formatPromptPath(cwd)} %{' '}
+          <span style={{ color: colors.promptUser, fontWeight: 400, whiteSpace: 'pre', flexShrink: 0, marginRight: '8px' }}>
+            yamin@Yamins-MacBook-Air {formatPromptPath(cwd)} %
           </span>
 
           <div

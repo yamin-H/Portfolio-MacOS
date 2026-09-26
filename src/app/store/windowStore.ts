@@ -364,7 +364,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     },
 
     isAssistantOpen: false,
-    assistantMode: 'search',
+    assistantMode: 'chat',
     assistantInitialPrompt: null,
     terminalPendingCmd: null,
     finderPendingFile: null,
@@ -708,7 +708,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         soundEngine.play(nextState ? 'pop' : 'close')
         set(() => ({
             isAssistantOpen: nextState,
-            assistantMode: 'search',
+            assistantMode: 'chat',
             isNotificationCenterOpen: false,
             isControlCenterOpen: false,
         }))
@@ -719,7 +719,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         set({
             isAssistantOpen: true,
             assistantInitialPrompt: prompt || null,
-            assistantMode: mode || (prompt ? 'chat' : 'search'),
+            assistantMode: mode || 'chat',
             isNotificationCenterOpen: false,
             isControlCenterOpen: false,
         })

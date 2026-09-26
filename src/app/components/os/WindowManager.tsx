@@ -14,6 +14,10 @@ import Photos from '@/components/apps/Photos'
 import Weather from '@/components/apps/Weather'
 import Settings from '@/components/apps/Settings'
 import AppStore from '@/components/apps/AppStore'
+import AboutView from '@/components/apps/about/AboutView'
+import PhilosophyView from '@/components/apps/about/PhilosophyView'
+import TechStackView from '@/components/apps/about/TechStackView'
+import ContactView from '@/components/apps/about/ContactView'
 
 export default function WindowManager() {
     const { windows, activeWindowId } = useWindowStore()
@@ -58,6 +62,14 @@ export default function WindowManager() {
                             <AppStore />
                         ) : win.id === 'resume' || win.id === 'pdf-viewer' ? (
                             <ResumeViewer />
+                        ) : win.id === 'about' || win.id === 'about-view' ? (
+                            <AboutView />
+                        ) : win.id === 'philosophy' ? (
+                            <PhilosophyView />
+                        ) : win.id === 'techstack' ? (
+                            <TechStackView />
+                        ) : win.id === 'contact' ? (
+                            <ContactView />
                         ) : (
                             <div
                                 style={{

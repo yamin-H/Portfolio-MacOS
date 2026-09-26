@@ -13,9 +13,9 @@ Currently open to early-stage remote teams who want someone to own
 hard problems from day one.
 
 ## Contact
-- Email: yamindr@gmail.com
-- GitHub: github.com/yamin
-- LinkedIn: linkedin.com/in/yamin`,
+- Email: yamindr3@gmail.com
+- GitHub: https://github.com/yamin-H
+- LinkedIn: https://www.linkedin.com/in/yamin-hossain-n/`,
 
   'stack.md': `# Stack
 

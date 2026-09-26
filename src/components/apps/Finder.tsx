@@ -45,6 +45,10 @@ import FinderFileIcon from './finder/FinderFileIcon'
 import ColumnView from './finder/ColumnView'
 import FinderContextMenu from './finder/FinderContextMenu'
 import LangGraphVisualizer from './LangGraphVisualizer'
+import AboutView from './about/AboutView'
+import PhilosophyView from './about/PhilosophyView'
+import TechStackView from './about/TechStackView'
+import ContactView from './about/ContactView'
 import { FSEntry, FileTag, TAG_COLORS, INITIAL_FS_ENTRIES } from './finder/finderData'
 
 export type FinderViewMode = 'icon' | 'list' | 'column' | 'gallery'
@@ -295,6 +299,24 @@ export default function Finder() {
           size: { width: 730, height: 760 },
         })
       }
+      return
+    }
+
+    // Custom views for 01_About_Me files:
+    if (
+      item.id === 'about-bio' ||
+      item.name.includes('Bio & Engineering Journey') ||
+      item.id === 'about-philosophy' ||
+      item.name.includes('Engineering Philosophy') ||
+      item.id === 'about-stack' ||
+      item.name.includes('Tech Stack') ||
+      item.id === 'about-contact' ||
+      item.name.includes('Contact & Socials') ||
+      item.name.toLowerCase().includes('about')
+    ) {
+      soundEngine.play('chime')
+      setQuickLookTab('preview')
+      setIsQuickLookOpen(true)
       return
     }
 
@@ -2148,9 +2170,30 @@ export default function Finder() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 450, damping: 32 }}
               style={{
-                width: 680,
-                maxWidth: '90vw',
-                height: 520,
+                width: (
+                  selectedItem.id === 'about-bio' ||
+                  selectedItem.name.includes('Bio & Engineering Journey') ||
+                  selectedItem.id === 'about-philosophy' ||
+                  selectedItem.name.includes('Engineering Philosophy') ||
+                  selectedItem.id === 'about-stack' ||
+                  selectedItem.name.includes('Tech Stack') ||
+                  selectedItem.id === 'about-contact' ||
+                  selectedItem.name.includes('Contact & Socials') ||
+                  selectedItem.name.toLowerCase().includes('about')
+                ) ? 760 : 680,
+                maxWidth: '92vw',
+                height: (
+                  selectedItem.id === 'about-bio' ||
+                  selectedItem.name.includes('Bio & Engineering Journey') ||
+                  selectedItem.id === 'about-philosophy' ||
+                  selectedItem.name.includes('Engineering Philosophy') ||
+                  selectedItem.id === 'about-stack' ||
+                  selectedItem.name.includes('Tech Stack') ||
+                  selectedItem.id === 'about-contact' ||
+                  selectedItem.name.includes('Contact & Socials') ||
+                  selectedItem.name.toLowerCase().includes('about')
+                ) ? 600 : 520,
+                maxHeight: '88vh',
                 backgroundColor: 'rgba(28, 30, 36, 0.94)',
                 backdropFilter: 'blur(50px) saturate(210%)',
                 borderRadius: 16,
@@ -2185,6 +2228,53 @@ export default function Finder() {
                       onClick={() => {
                         setIsQuickLookOpen(false)
                         handleOpenFile(selectedItem)
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 4,
+                        fontSize: 11.5,
+                        backgroundColor: '#007AFF',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <ExternalLink size={12} />
+                      <span>Open in Window</span>
+                    </button>
+                  )}
+                  {(
+                    selectedItem.id === 'about-bio' ||
+                    selectedItem.name.includes('Bio & Engineering Journey') ||
+                    selectedItem.id === 'about-philosophy' ||
+                    selectedItem.name.includes('Engineering Philosophy') ||
+                    selectedItem.id === 'about-stack' ||
+                    selectedItem.name.includes('Tech Stack') ||
+                    selectedItem.id === 'about-contact' ||
+                    selectedItem.name.includes('Contact & Socials') ||
+                    selectedItem.name.toLowerCase().includes('about')
+                  ) && (
+                    <button
+                      onClick={() => {
+                        setIsQuickLookOpen(false)
+                        const winId = selectedItem.id === 'about-philosophy' || selectedItem.name.includes('Philosophy')
+                          ? 'philosophy'
+                          : selectedItem.id === 'about-stack' || selectedItem.name.includes('Tech Stack')
+                          ? 'techstack'
+                          : selectedItem.id === 'about-contact' || selectedItem.name.includes('Contact')
+                          ? 'contact'
+                          : 'about'
+                        openWindow({
+                          id: winId,
+                          title: selectedItem.name,
+                          isOpen: true,
+                          isMinimized: false,
+                          position: { x: 180, y: 56 },
+                          size: { width: 840, height: 680 },
+                        })
                       }}
                       style={{
                         padding: '4px 10px',
@@ -2251,11 +2341,35 @@ export default function Finder() {
               </div>
 
               {/* Quick Look Content Area */}
-              <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+              <div
+                style={{
+                  flex: 1,
+                  overflow: 'auto',
+                  padding: (
+                    selectedItem.id === 'about-bio' ||
+                    selectedItem.name.includes('Bio & Engineering Journey') ||
+                    selectedItem.id === 'about-philosophy' ||
+                    selectedItem.name.includes('Engineering Philosophy') ||
+                    selectedItem.id === 'about-stack' ||
+                    selectedItem.name.includes('Tech Stack') ||
+                    selectedItem.id === 'about-contact' ||
+                    selectedItem.name.includes('Contact & Socials') ||
+                    selectedItem.name.toLowerCase().includes('about')
+                  ) ? 0 : 20,
+                }}
+              >
                 {quickLookTab === 'visualizer' ? (
                   <div style={{ height: '100%' }}>
                     <LangGraphVisualizer />
                   </div>
+                ) : (selectedItem.id === 'about-philosophy' || selectedItem.name.includes('Engineering Philosophy')) ? (
+                  <PhilosophyView />
+                ) : (selectedItem.id === 'about-stack' || selectedItem.name.includes('Tech Stack')) ? (
+                  <TechStackView />
+                ) : (selectedItem.id === 'about-contact' || selectedItem.name.includes('Contact & Socials')) ? (
+                  <ContactView />
+                ) : (selectedItem.id === 'about-bio' || selectedItem.name.includes('Bio & Engineering Journey') || selectedItem.name.toLowerCase().includes('about')) ? (
+                  <AboutView />
                 ) : selectedItem.content ? (
                   <pre
                     style={{

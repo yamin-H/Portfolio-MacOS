@@ -152,10 +152,10 @@ I build **production LLM agents, LangGraph pipelines, and RAG systems** — end-
 - **Delivery Model:** End-to-end ownership. I don't hand off half-finished demos. I own the webhook layer, the inference pipeline, the database indexing, and the dashboard.
 
 ### Contact & Reach
-- **Email:** contact@yamin.dev
+- **Email:** yamindr3@gmail.com
 - **Phone:** +880-01706960268
-- **GitHub:** https://github.com/yamin
-- **LinkedIn:** https://linkedin.com/in/yamin`,
+- **GitHub:** https://github.com/yamin-H
+- **LinkedIn:** https://www.linkedin.com/in/yamin-hossain-n/`,
   },
   {
     id: 'about-philosophy',
@@ -170,17 +170,13 @@ I build **production LLM agents, LangGraph pipelines, and RAG systems** — end-
     tag: 'yellow',
     content: `# Engineering Philosophy
 
-## 1. Reliability is the Feature
-A demo that works once on a golden prompt is not an engineering achievement. Every system I build has exponential backoff, structured error recovery, rollback handling, and retry limits before shipping.
+1 · Reliability is the Feature — A demo that works once on a golden prompt is not an engineering achievement. Every system I build has exponential backoff, structured error recovery, rollback handling, and retry limits before shipping.
 
-## 2. Agents Need Observability
-A multi-agent pipeline that fails silently is worse than no pipeline. Every node execution gets traced, every decision gets logged, and state transitions are deterministic. You cannot debug what you cannot see.
+2 · Agents Need Observability — A multi-agent pipeline that fails silently is worse than a crashed server. Traceability via LangSmith, structured logging, latency profiling, and token accounting are day-one requirements.
 
-## 3. Queue Everything External
-If an action touches an external API (LLM inference, GitHub webhooks, Slack alerts), it enters a BullMQ Redis queue with retry logic. This prevents runaway rate limits and thundering herds.
+3 · Code You Can Read at 3 AM — Clever one-liners cause 3 AM incidents. I write explicit, readable, well-typed code with clear domain boundaries, exhaustive error handling, and zero magic.
 
-## 4. Own the Entire Loop
-I build the webhook ingestion, the inference agent, the database schema, and the reactive frontend interface. Zero friction hand-offs.`,
+4 · Ship Small, Ship Often — Long branches breed merge hell and hidden regressions. I prefer trunk-based development, feature flags, atomic commits, and continuous deployment over quarterly big bangs.`,
   },
   {
     id: 'about-stack',
@@ -215,17 +211,6 @@ I build the webhook ingestion, the inference agent, the database schema, and the
 - **Docker & Turborepo:** Monorepo architecture, containerized microservices, CI/CD automated pipelines.`,
   },
   {
-    id: 'about-photo',
-    name: 'Profile_Photo.png',
-    isFolder: false,
-    kind: 'image',
-    size: '1.2 MB',
-    sizeBytes: 1258291,
-    dateModified: 'Sep 10, 2024 at 10:00 AM',
-    dateCreated: 'Sep 10, 2024 at 10:00 AM',
-    parentPath: '/Users/yamin/01_About_Me',
-  },
-  {
     id: 'about-contact',
     name: 'Contact & Socials.md',
     isFolder: false,
@@ -237,10 +222,12 @@ I build the webhook ingestion, the inference agent, the database schema, and the
     parentPath: '/Users/yamin/01_About_Me',
     content: `# Get in Touch
 
-- **Direct Email:** contact@yamin.dev
-- **Mobile / WhatsApp:** +880-01706960268
-- **GitHub:** [github.com/yamin](https://github.com/yamin)
-- **LinkedIn:** [linkedin.com/in/yamin](https://linkedin.com/in/yamin)
+Open to fullstack and AI engineering roles — remote, worldwide.
+
+- **Email:** yamindr3@gmail.com
+- **GitHub:** https://github.com/yamin-H
+- **LinkedIn:** https://www.linkedin.com/in/yamin-hossain-n/
+- **WhatsApp:** +880-01706960268
 - **Location:** Rajshahi, Bangladesh (Available for remote roles worldwide)`,
   },
 

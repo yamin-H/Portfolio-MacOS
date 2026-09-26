@@ -10,11 +10,11 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
 He builds production LLM agents, LangGraph pipelines, and RAG systems end-to-end, with reliability practices that hold up under real load.
 Key traits: Async queuing, exponential backoff, observable multi-agent pipelines. Not just demos; shipped products.
 Status: Currently open to early-stage remote teams who want someone to own hard problems from day one.
-Contact Email: yamindr@gmail.com, GitHub: github.com/yamin, LinkedIn: linkedin.com/in/yamin.`,
+Contact Email: yamindr3@gmail.com, GitHub: https://github.com/yamin-H, LinkedIn: https://www.linkedin.com/in/yamin-hossain-n/.`,
     keywords: ['yamin', 'who', 'about', 'bio', 'location', 'bangladesh', 'rajshahi', 'remote', 'role', 'engineer', 'hiring', 'status', 'contact'],
     recommendedActions: [
-      { id: 'open-about', label: 'View About in Finder', icon: 'finder', actionType: 'open_file', payload: 'About/about.md' },
-      { id: 'contact-mail', label: 'Email Yamin', icon: 'email', actionType: 'contact', payload: 'yamindr@gmail.com' },
+      { id: 'open-about', label: 'View Bio in Finder', icon: 'finder', actionType: 'open_file', payload: '01_About_Me/Bio & Engineering Journey.md' },
+      { id: 'contact-mail', label: 'Email Yamin', icon: 'email', actionType: 'contact', payload: 'yamindr3@gmail.com' },
     ],
   },
   {

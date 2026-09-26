@@ -558,9 +558,9 @@ Date:   Sat Sep 19 09:30:15 2026 +0600
       const contactCard = `
 Yamin Hossain — Contact Information
 ------------------------------------
-Email:    yamindr@gmail.com
-GitHub:   https://github.com/yamin
-LinkedIn: https://linkedin.com/in/yamin
+Email:    yamindr3@gmail.com
+GitHub:   https://github.com/yamin-H
+LinkedIn: https://www.linkedin.com/in/yamin-hossain-n/
 Location: Rajshahi, Bangladesh
 Status:   Open to early-stage remote engineering roles
 `
@@ -581,7 +581,7 @@ Status:   Open to early-stage remote engineering roles
           {
             id: Math.random().toString(),
             type: 'system',
-            content: `[HIRING PROTOCOL INITIATED]\nLooking to hire Yamin? Great decision.\nDirect Email: yamindr@gmail.com\nCurrently available for full-time remote senior AI/agent engineering roles.`,
+            content: `[HIRING PROTOCOL INITIATED]\nLooking to hire Yamin? Great decision.\nDirect Email: yamindr3@gmail.com\nGitHub: https://github.com/yamin-H\nLinkedIn: https://www.linkedin.com/in/yamin-hossain-n/\nCurrently available for full-time remote senior AI/agent engineering roles.`,
           },
         ]
       }

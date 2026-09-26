@@ -11,6 +11,7 @@ import StageManagerShelf from '@/components/os/StageManagerShelf'
 import WindowSnapOverlay from '@/components/os/WindowSnapOverlay'
 import AppSwitcher from '@/components/os/AppSwitcher'
 import UrlSyncManager from '@/components/os/UrlSyncManager'
+import DesktopIcons from '@/components/os/DesktopIcons'
 import { useWindowStore } from '@/app/store/windowStore'
 import React, { useEffect } from 'react'
 
@@ -133,6 +134,7 @@ export default function Desktop() {
             <UrlSyncManager />
             <MenuBar />
             <StageManagerShelf />
+            <DesktopIcons />
             <WindowManager />
             <WindowSnapOverlay />
             <AssistantSpotlight />

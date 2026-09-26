@@ -364,7 +364,7 @@ export function querySpotlight({
     results.push({
       id: 'ai-prompt-action',
       title: `Ask Apple Intelligence: "${query}"`,
-      subtitle: 'Apple Intelligence · GPT-OSS 120B & RAG Agent',
+      subtitle: 'Apple Intelligence · Autonomous AI Agent',
       category: 'all',
       iconType: 'ai',
       actionLabel: 'Ask AI',

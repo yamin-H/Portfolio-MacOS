@@ -399,9 +399,9 @@ export default function AssistantSpotlight() {
                   >
                     {assistantMode === 'chat'
                       ? providerInfo.hasGroqKey
-                        ? '🟢 GROQ LLM (GPT-OSS 120B)'
-                        : 'RAG AGENT'
-                      : 'KILLER FEATURE'}
+                        ? '🟢 Apple Intelligence (Online)'
+                        : 'Apple Intelligence'
+                      : 'Role Analyzer'}
                   </span>
                 </div>
               </div>
@@ -683,7 +683,7 @@ export default function AssistantSpotlight() {
                               borderRadius: '6px',
                             }}
                           >
-                            {msg.model || (providerInfo.hasGroqKey ? 'GPT-OSS 120B' : 'Semantic RAG')}
+                            {msg.model || (providerInfo.hasGroqKey ? 'Apple Intelligence' : 'Semantic RAG')}
                           </span>
                         </div>
 
@@ -887,7 +887,7 @@ export default function AssistantSpotlight() {
             <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
               {assistantMode === 'chat'
                 ? providerInfo.hasGroqKey
-                  ? 'Groq Cloud LPU Active (GPT-OSS 120B)'
+                  ? 'Apple Intelligence Neural Engine Active'
                   : 'Apple Intelligence RAG Engine Active'
                 : 'Semantic JD Matcher Active'}
             </span>
