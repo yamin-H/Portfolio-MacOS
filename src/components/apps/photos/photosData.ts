@@ -17,6 +17,8 @@ export interface PhotoItem {
   details?: string
   caption?: string
   aspect?: 'square' | 'portrait' | 'landscape'
+  isDeleted?: boolean
+  deletedAt?: number
 }
 
 export type PhotosSection =
@@ -26,6 +28,7 @@ export type PhotosSection =
   | 'places'
   | 'recents'
   | 'imports'
+  | 'recently-deleted'
   | 'media-videos'
   | 'media-selfies'
   | 'media-live'

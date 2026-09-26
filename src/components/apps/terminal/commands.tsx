@@ -193,7 +193,7 @@ export function executeCommand(rawInput: string, ctx: CommandContext): TerminalL
         // Prepend simulated dotfiles
         const dotFiles: FSFile[] = [
           { name: '.zshrc', type: 'file', extension: 'txt', content: '# macOS Portfolio zsh config\nexport USER="yamin"\n' },
-          { name: '.gitconfig', type: 'file', extension: 'txt', content: '[user]\n  name = Yamin Hossain\n  email = yamindr@gamil.com\n' },
+          { name: '.gitconfig', type: 'file', extension: 'txt', content: '[user]\n  name = Yamin Hossain\n  email = yamindr@gmail.com\n' },
         ]
         entries = [...dotFiles, ...entries]
       }
@@ -426,7 +426,7 @@ OPTIONS
      --stack
          Inspect core technical stack and architectural tooling.
      --contact
-         Email: yamindr@gamil.com | GitHub: github.com/yamin
+         Email: yamindr@gmail.com | GitHub: github.com/yamin
 
 SEE ALSO
      neofetch(1), git(1), cat(1), sudo(8)
@@ -457,25 +457,25 @@ Portfolio OS 1.0.0               September 2026                        YAMIN(1)
 
       if (sub === 'log') {
         const logOutput = `commit e5ac60d093234d1f97388ef52b5271d4 (HEAD -> main, origin/main)
-Author: Yamin Hossain <yamindr@gamil.com>
+Author: Yamin Hossain <yamindr@gmail.com>
 Date:   Tue Sep 22 16:40:00 2026 +0600
 
     feat(finder): implement macOS Go to Folder & Spotlight search modal
 
 commit 7f2a8904b12c49d28a349c0d12e45678
-Author: Yamin Hossain <yamindr@gamil.com>
+Author: Yamin Hossain <yamindr@gmail.com>
 Date:   Mon Sep 21 14:15:22 2026 +0600
 
     feat(agents): build LangGraph multi-agent orchestration pipeline
 
 commit 4a3b1c98d7e6f5021a89c4b73e210987
-Author: Yamin Hossain <yamindr@gamil.com>
+Author: Yamin Hossain <yamindr@gmail.com>
 Date:   Sun Sep 20 11:00:10 2026 +0600
 
     perf(rag): optimize vector retrieval with pgvector and semantic cache
 
 commit 1b8d234a980c5e71420f67891234abcd
-Author: Yamin Hossain <yamindr@gamil.com>
+Author: Yamin Hossain <yamindr@gmail.com>
 Date:   Sat Sep 19 09:30:15 2026 +0600
 
     chore(shell): establish window manager spring physics and direct DOM drag`
@@ -558,7 +558,7 @@ Date:   Sat Sep 19 09:30:15 2026 +0600
       const contactCard = `
 Yamin Hossain — Contact Information
 ------------------------------------
-Email:    yamindr@gamil.com
+Email:    yamindr@gmail.com
 GitHub:   https://github.com/yamin
 LinkedIn: https://linkedin.com/in/yamin
 Location: Rajshahi, Bangladesh
@@ -581,7 +581,7 @@ Status:   Open to early-stage remote engineering roles
           {
             id: Math.random().toString(),
             type: 'system',
-            content: `[HIRING PROTOCOL INITIATED]\nLooking to hire Yamin? Great decision.\nDirect Email: yamindr@gamil.com\nCurrently available for full-time remote senior AI/agent engineering roles.`,
+            content: `[HIRING PROTOCOL INITIATED]\nLooking to hire Yamin? Great decision.\nDirect Email: yamindr@gmail.com\nCurrently available for full-time remote senior AI/agent engineering roles.`,
           },
         ]
       }

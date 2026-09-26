@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, Check } from 'lucide-react'
 import { FSEntry, FileTag, TAG_COLORS } from './finderData'
@@ -60,10 +61,15 @@ export default function FinderContextMenu({
   onCleanUp,
   onShowViewOptions,
 }: FinderContextMenuProps) {
+  const [mounted, setMounted] = useState(false)
   const [hoveredIdx, setHoveredIdx] = useState<string | null>(null)
   const [isSortSubmenuOpen, setIsSortSubmenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState({ x, y })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Calculate viewport boundaries and clamp positions so menu is never cut off
   useEffect(() => {
@@ -75,12 +81,19 @@ export default function FinderContextMenu({
     let posX = x
     let posY = y
 
+    // If opening to the right would overflow the right edge of viewport, flip to left of cursor
     if (posX + MENU_WIDTH > vw - 12) {
-      posX = Math.max(12, vw - MENU_WIDTH - 12)
+      posX = x - MENU_WIDTH
     }
-    if (posY + MENU_HEIGHT > vh - 24) {
-      posY = Math.max(36, vh - MENU_HEIGHT - 24)
+
+    // If opening downwards would overflow the bottom edge (leaving clearance for dock), flip above cursor
+    if (posY + MENU_HEIGHT > vh - 60) {
+      posY = y - MENU_HEIGHT
     }
+
+    // Safety clamping inside viewport
+    posX = Math.max(10, Math.min(posX, vw - MENU_WIDTH - 10))
+    posY = Math.max(32, Math.min(posY, vh - MENU_HEIGHT - 10))
 
     setCoords({ x: posX, y: posY })
   }, [x, y, item])
@@ -218,7 +231,9 @@ export default function FinderContextMenu({
   // Submenu flip detection (if menu is near right edge, submenu opens on left)
   const shouldSubmenuOpenLeft = coords.x + 220 + 175 > (typeof window !== 'undefined' ? window.innerWidth : 1200)
 
-  return (
+  if (!mounted || typeof document === 'undefined') return null
+
+  return createPortal(
     <>
       {/* ── Invisible Click-Away Backdrop ── */}
       <div
@@ -548,6 +563,7 @@ export default function FinderContextMenu({
           </>
         )}
       </motion.div>
-    </>
+    </>,
+    document.body
   )
 }

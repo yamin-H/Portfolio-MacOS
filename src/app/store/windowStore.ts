@@ -190,18 +190,19 @@ interface WindowStore {
 
   // ── Assistant / Spotlight ──────────────────────────────────────────────────
   isAssistantOpen: boolean
-  assistantMode: 'chat' | 'jd'
+  assistantMode: 'search' | 'chat' | 'jd'
   assistantInitialPrompt: string | null
   terminalPendingCmd: string | null
   finderPendingFile: string | null
   clearTerminalPendingCmd: () => void
   clearFinderPendingFile: () => void
   toggleAssistant: () => void
-  setAssistantMode: (mode: 'chat' | 'jd') => void
-  openAssistant: (initialPrompt?: string, mode?: 'chat' | 'jd') => void
+  setAssistantMode: (mode: 'search' | 'chat' | 'jd') => void
+  openAssistant: (initialPrompt?: string, mode?: 'search' | 'chat' | 'jd') => void
   closeAssistant: () => void
   openFinderFile: (filePath: string) => void
   openTerminalCmd: (cmd?: string) => void
+  openApp: (appId: string) => void
 
   // ── Notification Center ────────────────────────────────────────────────────
   isNotificationCenterOpen: boolean
@@ -363,7 +364,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     },
 
     isAssistantOpen: false,
-    assistantMode: 'chat',
+    assistantMode: 'search',
     assistantInitialPrompt: null,
     terminalPendingCmd: null,
     finderPendingFile: null,
@@ -707,6 +708,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         soundEngine.play(nextState ? 'pop' : 'close')
         set(() => ({
             isAssistantOpen: nextState,
+            assistantMode: 'search',
             isNotificationCenterOpen: false,
             isControlCenterOpen: false,
         }))
@@ -717,7 +719,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         set({
             isAssistantOpen: true,
             assistantInitialPrompt: prompt || null,
-            assistantMode: mode || 'chat',
+            assistantMode: mode || (prompt ? 'chat' : 'search'),
             isNotificationCenterOpen: false,
             isControlCenterOpen: false,
         })
@@ -789,6 +791,47 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
                 position: { x: 180, y: 100 },
                 size: { width: 700, height: 450 },
             })
+        }
+    },
+
+    openApp: (appId) => {
+        const appConfigs: Record<string, { title: string; width: number; height: number }> = {
+            calculator: { title: 'Calculator', width: 380, height: 540 },
+            appstore: { title: 'App Store', width: 1040, height: 680 },
+            files: { title: 'Files', width: 1040, height: 640 },
+            finder: { title: 'Finder', width: 1040, height: 640 },
+            notes: { title: 'Notes', width: 940, height: 600 },
+            photos: { title: 'Photos', width: 940, height: 600 },
+            safari: { title: 'Safari', width: 1020, height: 640 },
+            settings: { title: 'System Settings', width: 840, height: 580 },
+            terminal: { title: 'Terminal', width: 700, height: 450 },
+            weather: { title: 'Weather', width: 880, height: 600 },
+        }
+        const cfg = appConfigs[appId] || {
+            title: appId.charAt(0).toUpperCase() + appId.slice(1),
+            width: 900,
+            height: 600,
+        }
+        const existing = get().windows.find((w) => w.id === appId)
+        if (!existing) {
+            const offset = (get().windows.filter((w) => w.isOpen).length % 6) * 22
+            const screenW = typeof window !== 'undefined' ? window.innerWidth : 1440
+            const screenH = typeof window !== 'undefined' ? window.innerHeight : 900
+            const x = Math.max(30, Math.round((screenW - cfg.width) / 2 + offset))
+            const y = Math.max(48, Math.round((screenH - cfg.height) / 2 - 28 + offset))
+
+            get().openWindow({
+                id: appId,
+                title: cfg.title,
+                isOpen: true,
+                isMinimized: false,
+                position: { x, y },
+                size: { width: cfg.width, height: cfg.height },
+            })
+        } else if (existing.isMinimized) {
+            get().restoreWindow(existing.id)
+        } else {
+            get().focusWindow(existing.id)
         }
     },
 

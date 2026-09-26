@@ -9,7 +9,7 @@ export async function GET() {
   return NextResponse.json({
     hasGroqKey,
     provider: hasGroqKey ? 'groq' : 'local-rag',
-    model: hasGroqKey ? 'llama-3.3-70b-versatile' : 'apple-intelligence-rag',
+    model: hasGroqKey ? (process.env.GROQ_MODEL?.trim() || 'gpt-oss-120b') : 'apple-intelligence-rag',
   })
 }
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const sources = Array.from(new Set(matches.map((m) => m.chunk.fileKey)))
     const actionPills = collectActionPills(matches)
 
-    // 2. If Groq API Key is configured -> Query Groq Cloud (Llama 3.3 70B)
+    // 2. If Groq API Key is configured -> Query Groq Cloud (GPT-OSS 120B)
     if (hasGroqKey) {
       try {
         const retrievedContext = matches
@@ -42,7 +42,7 @@ You speak on behalf of Yamin Hossain, an AI-Native Software Engineer based in Ra
 CORE PROFILE & GROUND TRUTH:
 - Role & Focus: AI-Native Software Engineer specializing in production LLM pipelines, LangGraph multi-agent systems, and resilient backend architectures.
 - Status: Open to early-stage remote engineering teams who need someone to own hard problems end-to-end from day one.
-- Contact: Email: yamindr@gamil.com | GitHub: github.com/yamin | LinkedIn: linkedin.com/in/yamin
+- Contact: Email: yamindr@gmail.com | GitHub: github.com/yamin | LinkedIn: linkedin.com/in/yamin
 
 PRIMARY TECHNICAL STACK:
 - AI & Multi-Agent Frameworks: LangGraph (stateful cyclical graphs, checkpointers, conditional edge routing), LangChain, pgvector (384-dimensional cosine embeddings), prompt engineering, schema guardrails (Zod/Pydantic).
@@ -92,6 +92,10 @@ STYLE & FORMATTING GUIDELINES:
           { role: 'user', content: cleanQuery },
         ]
 
+        const configuredModel = process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-120b'
+        // Groq API uses 'openai/gpt-oss-120b' identifier
+        const groqModelId = configuredModel === 'gpt-oss-120b' ? 'openai/gpt-oss-120b' : configuredModel
+
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -99,16 +103,17 @@ STYLE & FORMATTING GUIDELINES:
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
+            model: groqModelId,
             messages: conversationMessages,
             temperature: 0.35,
-            max_tokens: 1200,
+            max_tokens: 3000,
           }),
         })
 
         if (groqRes.ok) {
           const data = await groqRes.json()
-          const fullText = data.choices?.[0]?.message?.content?.trim()
+          const choiceMsg = data.choices?.[0]?.message
+          const fullText = (choiceMsg?.content?.trim()) || (choiceMsg?.reasoning?.trim())
 
           if (fullText) {
             return NextResponse.json({
@@ -119,7 +124,7 @@ STYLE & FORMATTING GUIDELINES:
               ],
               sources: sources.length > 0 ? sources : ['stack.md', 'philosophy.md'],
               provider: 'groq',
-              model: 'Llama 3.3 70B (Groq LPU)',
+              model: 'GPT-OSS 120B (Groq LPU)',
               isLiveLLM: true,
             })
           }

@@ -25,8 +25,10 @@ import {
   Camera,
   Maximize2,
   RotateCw,
+  RotateCcw,
   Sliders,
   Check,
+  Loader2,
 } from 'lucide-react'
 import { useWindowContext } from '@/app/components/os/Window'
 import { soundEngine } from '@/lib/sound/soundEngine'
@@ -38,34 +40,75 @@ import {
   FilterMode,
   INITIAL_PHOTOS,
 } from './photos/photosData'
+import {
+  getAllPhotosFromDB,
+  saveAllPhotosToDB,
+  deletePhotoFromDB,
+  getCleanLocalStoragePhotos,
+  saveToLocalStorage,
+  optimizeAndReadImageFile,
+} from './photos/photosStorage'
+import PhotosContextMenu from './photos/PhotosContextMenu'
+import PhotosDeleteModal from './photos/PhotosDeleteModal'
 
 export default function Photos() {
   const windowContext = useWindowContext()
 
-  // ─── Photos State (Initialized + Local Storage Persistence) ────────────────
+  // ─── Photos State (IndexedDB + Local Storage Synchronization) ───────────────
   const [photos, setPhotos] = useState<PhotoItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('macos_photos_library')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    return getCleanLocalStoragePhotos()
+  })
+  const [isImporting, setIsImporting] = useState(false)
+
+  // On mount: Load persistent photos from IndexedDB and sync
+  useEffect(() => {
+    let isMounted = true
+    getAllPhotosFromDB().then((dbPhotos) => {
+      if (!isMounted) return
+      if (dbPhotos && dbPhotos.length > 0) {
+        setPhotos(dbPhotos)
+        saveToLocalStorage(dbPhotos)
+      } else {
+        // If DB is empty, sync any clean localStorage items to DB
+        const localClean = getCleanLocalStoragePhotos()
+        if (localClean && localClean.length > 0) {
+          saveAllPhotosToDB(localClean)
         }
-      } catch (e) {
-        console.error('Failed to load photos from localStorage', e)
       }
+    })
+    return () => {
+      isMounted = false
     }
-    return INITIAL_PHOTOS
+  }, [])
+
+  // Sync to IndexedDB and LocalStorage on state changes
+  const updatePhotosState = (updater: (prev: PhotoItem[]) => PhotoItem[]) => {
+    setPhotos((prev) => {
+      const next = updater(prev)
+      saveAllPhotosToDB(next)
+      saveToLocalStorage(next)
+      return next
+    })
+  }
+
+  // Delete Modal & Context Menu States
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    photo: PhotoItem | null
+    isPermanent: boolean
+    isMultiple?: boolean
+    count?: number
+  }>({
+    isOpen: false,
+    photo: null,
+    isPermanent: false,
   })
 
-  // Save to localStorage when photos change
-  useEffect(() => {
-    try {
-      localStorage.setItem('macos_photos_library', JSON.stringify(photos))
-    } catch (e) {
-      console.warn('Could not save photos to localStorage (quota or disabled)', e)
-    }
-  }, [photos])
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    photo: PhotoItem
+  } | null>(null)
 
   // ─── Navigation & Views ────────────────────────────────────────────────────
   const [activeSection, setActiveSection] = useState<PhotosSection>('library')
@@ -108,8 +151,18 @@ export default function Photos() {
   }, [viewingPhotoId, photos])
 
   // ─── Filtered Photos Collection ───────────────────────────────────────────
+  const deletedPhotosCount = useMemo(() => photos.filter((p) => p.isDeleted).length, [photos])
+  const activePhotosCount = useMemo(() => photos.filter((p) => !p.isDeleted).length, [photos])
+
   const displayedPhotos = useMemo(() => {
     let list = [...photos]
+
+    // Filter between Active Library and Recently Deleted
+    if (activeSection === 'recently-deleted') {
+      list = list.filter((p) => p.isDeleted)
+    } else {
+      list = list.filter((p) => !p.isDeleted)
+    }
 
     // Sidebar Section Filter
     if (activeSection === 'recents') {
@@ -176,84 +229,194 @@ export default function Photos() {
     }
   }, [zoomLevel])
 
-  // ─── Actions: Toggle Favorite, Import, Delete ──────────────────────────────
+  // ─── Actions: Toggle Favorite, Import, Delete, Recover ──────────────────────
   const toggleFavorite = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     soundEngine.play('click')
-    setPhotos((prev) =>
+    updatePhotosState((prev) =>
       prev.map((p) => (p.id === id ? { ...p, isFavorite: !p.isFavorite } : p))
     )
   }
 
-  // Handle local user file upload (Drag & Drop or File Input)
-  const handleImportFiles = (files: FileList | null) => {
+  // Handle local user file upload (Drag & Drop or File Input) with Persistent Data URLs
+  const handleImportFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
+    setIsImporting(true)
     soundEngine.play('pop')
 
-    const newItems: PhotoItem[] = []
     const now = new Date()
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const dateStr = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`
 
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) return
-      const url = URL.createObjectURL(file)
-      const baseName = file.name.replace(/\.[^/.]+$/, '')
+    try {
+      const validFiles = Array.from(files).filter((file) => file.type.startsWith('image/'))
+      const newItems: PhotoItem[] = []
 
-      newItems.push({
-        id: `user-photo-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-        title: baseName,
-        src: url,
-        date: dateStr,
-        dateHeader: `${monthNames[now.getMonth()]} ${now.getFullYear()}`,
-        location: 'Rajshahi, Bangladesh',
-        year: now.getFullYear(),
-        month: `${monthNames[now.getMonth()]} ${now.getFullYear()}`,
-        day: dateStr,
-        isFavorite: false,
-        isPortrait: file.name.toLowerCase().includes('portrait'),
-        mediaType: 'photo',
-        album: 'personal',
-        camera: 'iPhone 15 Pro · Main Camera',
-        details: `${(file.size / 1024 / 1024).toFixed(1)} MB · Original Quality`,
-        caption: baseName,
-      })
-    })
+      for (const file of validFiles) {
+        const { dataUrl, width, height } = await optimizeAndReadImageFile(file)
+        const baseName = file.name.replace(/\.[^/.]+$/, '')
+        const isPortrait = height > width || file.name.toLowerCase().includes('portrait')
 
-    if (newItems.length > 0) {
-      setPhotos((prev) => [...newItems, ...prev])
-      setSelectedPhotoId(newItems[0].id)
+        newItems.push({
+          id: `user-photo-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          title: baseName,
+          src: dataUrl,
+          date: dateStr,
+          dateHeader: `${monthNames[now.getMonth()]} ${now.getFullYear()}`,
+          location: 'Rajshahi, Bangladesh',
+          year: now.getFullYear(),
+          month: `${monthNames[now.getMonth()]} ${now.getFullYear()}`,
+          day: dateStr,
+          isFavorite: false,
+          isPortrait,
+          mediaType: isPortrait ? 'portrait' : 'photo',
+          album: 'personal',
+          camera: 'iPhone 15 Pro · Main Camera',
+          details: `${width} × ${height} · ${(file.size / 1024 / 1024).toFixed(1)} MB`,
+          caption: baseName,
+          isDeleted: false,
+        })
+      }
+
+      if (newItems.length > 0) {
+        updatePhotosState((prev) => [...newItems, ...prev])
+        setSelectedPhotoId(newItems[0].id)
+        soundEngine.play('action')
+      }
+    } catch (err) {
+      console.error('[Photos] Failed to optimize and save imported images:', err)
+    } finally {
+      setIsImporting(false)
     }
   }
 
-  // ─── Keyboard Navigation for Lightbox ──────────────────────────────────────
+  // Delete / Trash execution
+  const executeDeletePhoto = (photoId: string, permanent: boolean) => {
+    soundEngine.play('close')
+    if (permanent) {
+      updatePhotosState((prev) => prev.filter((p) => p.id !== photoId))
+      deletePhotoFromDB(photoId)
+    } else {
+      updatePhotosState((prev) =>
+        prev.map((p) =>
+          p.id === photoId ? { ...p, isDeleted: true, deletedAt: Date.now() } : p
+        )
+      )
+    }
+
+    if (selectedPhotoId === photoId) {
+      setSelectedPhotoId(null)
+    }
+
+    if (viewingPhotoId === photoId) {
+      const remaining = displayedPhotos.filter((p) => p.id !== photoId)
+      if (remaining.length > 0) {
+        const currIdx = displayedPhotos.findIndex((p) => p.id === photoId)
+        const nextPhoto = remaining[Math.min(currIdx, remaining.length - 1)]
+        setViewingPhotoId(nextPhoto ? nextPhoto.id : null)
+      } else {
+        setViewingPhotoId(null)
+      }
+    }
+
+    setDeleteModal({ isOpen: false, photo: null, isPermanent: false })
+  }
+
+  // Recover photo back to library
+  const handleRecoverPhoto = (photoId: string) => {
+    soundEngine.play('pop')
+    updatePhotosState((prev) =>
+      prev.map((p) =>
+        p.id === photoId ? { ...p, isDeleted: false, deletedAt: undefined } : p
+      )
+    )
+    if (selectedPhotoId === photoId) {
+      setSelectedPhotoId(null)
+    }
+  }
+
+  // Duplicate photo
+  const handleDuplicatePhoto = (photo: PhotoItem) => {
+    soundEngine.play('pop')
+    const duplicate: PhotoItem = {
+      ...photo,
+      id: `user-photo-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      title: `${photo.title} copy`,
+      isDeleted: false,
+    }
+    updatePhotosState((prev) => [duplicate, ...prev])
+    setSelectedPhotoId(duplicate.id)
+  }
+
+  // Empty Trash (Permanently delete all in Recently Deleted)
+  const handleEmptyTrash = () => {
+    soundEngine.play('close')
+    const deletedItems = photos.filter((p) => p.isDeleted)
+    deletedItems.forEach((item) => deletePhotoFromDB(item.id))
+    updatePhotosState((prev) => prev.filter((p) => !p.isDeleted))
+    setSelectedPhotoId(null)
+    setDeleteModal({ isOpen: false, photo: null, isPermanent: false })
+  }
+
+  // ─── Keyboard Shortcuts: Navigation, Lightbox & Delete ─────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!viewingPhotoId) return
-
-      if (e.key === 'Escape') {
+      // Lightbox Escape
+      if (viewingPhotoId && e.key === 'Escape') {
         setViewingPhotoId(null)
         return
       }
 
-      const idx = displayedPhotos.findIndex((p) => p.id === viewingPhotoId)
-      if (idx === -1) return
+      // Delete / Backspace key shortcut
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        if (viewingPhoto) {
+          e.preventDefault()
+          if (e.metaKey || e.ctrlKey) {
+            executeDeletePhoto(viewingPhoto.id, activeSection === 'recently-deleted')
+          } else {
+            setDeleteModal({
+              isOpen: true,
+              photo: viewingPhoto,
+              isPermanent: activeSection === 'recently-deleted',
+            })
+          }
+          return
+        } else if (selectedPhoto) {
+          e.preventDefault()
+          if (e.metaKey || e.ctrlKey) {
+            executeDeletePhoto(selectedPhoto.id, activeSection === 'recently-deleted')
+          } else {
+            setDeleteModal({
+              isOpen: true,
+              photo: selectedPhoto,
+              isPermanent: activeSection === 'recently-deleted',
+            })
+          }
+          return
+        }
+      }
 
-      if (e.key === 'ArrowRight' && idx < displayedPhotos.length - 1) {
-        soundEngine.play('click')
-        setViewingPhotoId(displayedPhotos[idx + 1].id)
-      } else if (e.key === 'ArrowLeft' && idx > 0) {
-        soundEngine.play('click')
-        setViewingPhotoId(displayedPhotos[idx - 1].id)
-      } else if (e.key === ' ') {
-        e.preventDefault()
-        setViewingPhotoId(null)
+      // Lightbox Arrow Navigation
+      if (viewingPhotoId) {
+        const idx = displayedPhotos.findIndex((p) => p.id === viewingPhotoId)
+        if (idx === -1) return
+
+        if (e.key === 'ArrowRight' && idx < displayedPhotos.length - 1) {
+          soundEngine.play('click')
+          setViewingPhotoId(displayedPhotos[idx + 1].id)
+        } else if (e.key === 'ArrowLeft' && idx > 0) {
+          soundEngine.play('click')
+          setViewingPhotoId(displayedPhotos[idx - 1].id)
+        } else if (e.key === ' ') {
+          e.preventDefault()
+          setViewingPhotoId(null)
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [viewingPhotoId, displayedPhotos])
+  }, [viewingPhotoId, viewingPhoto, selectedPhoto, displayedPhotos, activeSection])
 
   // Active Section Label
   const activeHeaderTitle = useMemo(() => {
@@ -270,6 +433,8 @@ export default function Photos() {
         return 'Recently Added'
       case 'imports':
         return 'Imports'
+      case 'recently-deleted':
+        return 'Recently Deleted'
       case 'media-portrait':
         return 'Portraits'
       case 'media-live':
@@ -297,6 +462,8 @@ export default function Photos() {
     switch (activeSection) {
       case 'library':
         return 'Rajshahi · Hadba Om Al Said & Tech Lab'
+      case 'recently-deleted':
+        return `${deletedPhotosCount} ${deletedPhotosCount === 1 ? 'photo' : 'photos'} · Items show the days remaining before permanent deletion.`
       case 'album-work':
         return 'Production Agent Architecture & Models'
       case 'album-hackathons':
@@ -306,7 +473,7 @@ export default function Photos() {
       default:
         return 'Yamin Hossain — Portfolio Photography'
     }
-  }, [activeSection])
+  }, [activeSection, deletedPhotosCount])
 
   return (
     <div
@@ -549,7 +716,7 @@ export default function Photos() {
               }
             }}
             title="Favorite"
-            disabled={!selectedPhotoId}
+            disabled={!selectedPhotoId || activeSection === 'recently-deleted'}
             style={{
               width: 26,
               height: 26,
@@ -557,8 +724,8 @@ export default function Photos() {
               border: 'none',
               backgroundColor: 'transparent',
               color: selectedPhoto?.isFavorite ? '#FF2D55' : '#4A4C52',
-              opacity: selectedPhotoId ? 1 : 0.4,
-              cursor: selectedPhotoId ? 'pointer' : 'default',
+              opacity: selectedPhotoId && activeSection !== 'recently-deleted' ? 1 : 0.35,
+              cursor: selectedPhotoId && activeSection !== 'recently-deleted' ? 'pointer' : 'default',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -567,10 +734,66 @@ export default function Photos() {
             <Heart size={15} fill={selectedPhoto?.isFavorite ? '#FF2D55' : 'none'} />
           </button>
 
+          {/* Put Back / Recover Button (when in Recently Deleted) */}
+          {activeSection === 'recently-deleted' && selectedPhoto && (
+            <button
+              onClick={() => handleRecoverPhoto(selectedPhoto.id)}
+              title="Put Back to Library"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                height: 26,
+                padding: '0 8px',
+                borderRadius: 5,
+                border: '1px solid rgba(0, 122, 255, 0.3)',
+                backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                color: '#007AFF',
+                fontSize: 11.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <RotateCcw size={12} />
+              <span>Put Back</span>
+            </button>
+          )}
+
+          {/* Delete Photo Button (Trash) */}
+          <button
+            onClick={() => {
+              if (selectedPhoto) {
+                setDeleteModal({
+                  isOpen: true,
+                  photo: selectedPhoto,
+                  isPermanent: activeSection === 'recently-deleted',
+                })
+              }
+            }}
+            title={activeSection === 'recently-deleted' ? 'Delete Immediately' : 'Delete Photo (⌫)'}
+            disabled={!selectedPhotoId}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 5,
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: selectedPhotoId ? '#FF3B30' : '#4A4C52',
+              opacity: selectedPhotoId ? 1 : 0.35,
+              cursor: selectedPhotoId ? 'pointer' : 'default',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Trash2 size={15} />
+          </button>
+
           {/* Import Photos Button [ + ] */}
           <button
             onClick={() => fileInputRef.current?.click()}
             title="Import Photos from Computer"
+            disabled={isImporting}
             style={{
               width: 26,
               height: 26,
@@ -578,13 +801,14 @@ export default function Photos() {
               border: '1px solid rgba(0, 0, 0, 0.12)',
               backgroundColor: 'rgba(255, 255, 255, 0.8)',
               color: '#1D1D1F',
-              cursor: 'pointer',
+              cursor: isImporting ? 'default' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              opacity: isImporting ? 0.6 : 1,
             }}
           >
-            <Plus size={14} />
+            {isImporting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
           </button>
 
           {/* Search Button / Input */}
@@ -805,6 +1029,47 @@ export default function Photos() {
               >
                 <Download size={15} />
                 <span>Imports</span>
+              </div>
+
+              {/* Recently Deleted */}
+              <div
+                onClick={() => {
+                  soundEngine.play('click')
+                  setActiveSection('recently-deleted')
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '5px 8px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  backgroundColor: activeSection === 'recently-deleted' ? '#007AFF' : 'transparent',
+                  color: activeSection === 'recently-deleted' ? '#FFFFFF' : '#1D1D1F',
+                  fontWeight: activeSection === 'recently-deleted' ? 600 : 400,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Trash2 size={15} color={activeSection === 'recently-deleted' ? '#FFFFFF' : '#8E8E93'} />
+                  <span>Recently Deleted</span>
+                </div>
+                {deletedPhotosCount > 0 && (
+                  <span
+                    style={{
+                      fontSize: 10.5,
+                      padding: '1px 6px',
+                      borderRadius: 10,
+                      backgroundColor:
+                        activeSection === 'recently-deleted'
+                          ? 'rgba(255, 255, 255, 0.25)'
+                          : 'rgba(0, 0, 0, 0.08)',
+                      color: activeSection === 'recently-deleted' ? '#FFFFFF' : '#6E6E73',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {deletedPhotosCount}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -1046,87 +1311,129 @@ export default function Photos() {
               </div>
             </div>
 
-            {/* Filter By: All Items Dropdown matching reference image! */}
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => setIsFilterMenuOpen((prev) => !prev)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  fontSize: 12,
-                  color: '#55575E',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: 5,
-                }}
-              >
-                <span>Filter By:</span>
-                <span style={{ fontWeight: 600, color: '#1D1D1F' }}>
-                  {filterMode === 'all'
-                    ? 'All Items'
-                    : filterMode === 'favorites'
-                    ? 'Favorites'
-                    : filterMode === 'portrait'
-                    ? 'Portraits'
-                    : 'Live Photos'}
-                </span>
-                <ChevronDown size={12} opacity={0.6} />
-              </button>
-
-              {/* Filter Dropdown Menu */}
-              {isFilterMenuOpen && (
-                <div
+            {/* Header Right Action: Empty Recently Deleted or Filter Dropdown */}
+            {activeSection === 'recently-deleted' ? (
+              <div>
+                {deletedPhotosCount > 0 && (
+                  <button
+                    onClick={() => {
+                      setDeleteModal({
+                        isOpen: true,
+                        photo: null,
+                        isPermanent: true,
+                        isMultiple: true,
+                        count: deletedPhotosCount,
+                      })
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '5px 12px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255, 59, 48, 0.3)',
+                      backgroundColor: 'rgba(255, 59, 48, 0.08)',
+                      color: '#FF3B30',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.1s ease',
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = 'rgba(255, 59, 48, 0.15)')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = 'rgba(255, 59, 48, 0.08)')
+                    }
+                  >
+                    <Trash2 size={13} />
+                    <span>Empty Recently Deleted</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setIsFilterMenuOpen((prev) => !prev)}
                   style={{
-                    position: 'absolute',
-                    top: 28,
-                    right: 0,
-                    width: 140,
-                    borderRadius: 8,
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(20px)',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)',
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
-                    padding: '4px',
-                    zIndex: 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    fontSize: 12,
+                    color: '#55575E',
+                    cursor: 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: 5,
                   }}
                 >
-                  {(
-                    [
-                      { key: 'all', label: 'All Items' },
-                      { key: 'favorites', label: 'Favorites' },
-                      { key: 'portrait', label: 'Portraits' },
-                      { key: 'live', label: 'Live Photos' },
-                    ] as const
-                  ).map((opt) => (
-                    <div
-                      key={opt.key}
-                      onClick={() => {
-                        soundEngine.play('click')
-                        setFilterMode(opt.key)
-                        setIsFilterMenuOpen(false)
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '6px 8px',
-                        borderRadius: 5,
-                        fontSize: 12,
-                        cursor: 'pointer',
-                        color: filterMode === opt.key ? '#007AFF' : '#1D1D1F',
-                        backgroundColor: filterMode === opt.key ? 'rgba(0, 122, 255, 0.1)' : 'transparent',
-                      }}
-                    >
-                      <span>{opt.label}</span>
-                      {filterMode === opt.key && <Check size={12} />}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  <span>Filter By:</span>
+                  <span style={{ fontWeight: 600, color: '#1D1D1F' }}>
+                    {filterMode === 'all'
+                      ? 'All Items'
+                      : filterMode === 'favorites'
+                      ? 'Favorites'
+                      : filterMode === 'portrait'
+                      ? 'Portraits'
+                      : 'Live Photos'}
+                  </span>
+                  <ChevronDown size={12} opacity={0.6} />
+                </button>
+
+                {/* Filter Dropdown Menu */}
+                {isFilterMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 28,
+                      right: 0,
+                      width: 140,
+                      borderRadius: 8,
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(20px)',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)',
+                      border: '1px solid rgba(0, 0, 0, 0.12)',
+                      padding: '4px',
+                      zIndex: 200,
+                    }}
+                  >
+                    {(
+                      [
+                        { key: 'all', label: 'All Items' },
+                        { key: 'favorites', label: 'Favorites' },
+                        { key: 'portrait', label: 'Portraits' },
+                        { key: 'live', label: 'Live Photos' },
+                      ] as const
+                    ).map((opt) => (
+                      <div
+                        key={opt.key}
+                        onClick={() => {
+                          soundEngine.play('click')
+                          setFilterMode(opt.key)
+                          setIsFilterMenuOpen(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 8px',
+                          borderRadius: 5,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          color: filterMode === opt.key ? '#007AFF' : '#1D1D1F',
+                          backgroundColor:
+                            filterMode === opt.key ? 'rgba(0, 122, 255, 0.1)' : 'transparent',
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {filterMode === opt.key && <Check size={12} />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Photo Grid / Empty State */}
@@ -1138,71 +1445,119 @@ export default function Photos() {
             }}
           >
             {displayedPhotos.length === 0 ? (
-              /* Authentic macOS Empty Library State */
-              <div
-                style={{
-                  height: '80%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 16,
-                  textAlign: 'center',
-                  padding: '0 20px',
-                }}
-              >
+              activeSection === 'recently-deleted' ? (
+                /* Authentic macOS Empty Recently Deleted State */
                 <div
                   style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 18,
-                    backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                    height: '80%',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#007AFF',
+                    gap: 16,
+                    textAlign: 'center',
+                    padding: '0 20px',
                   }}
                 >
-                  <Camera size={36} />
-                </div>
-                <div>
-                  <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1D1D1F', margin: 0 }}>
-                    Yamin&apos;s Photo Library
-                  </h2>
-                  <p
+                  <div
                     style={{
-                      fontSize: 13,
+                      width: 72,
+                      height: 72,
+                      borderRadius: 18,
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       color: '#8E8E93',
-                      maxWidth: 420,
-                      marginTop: 6,
-                      lineHeight: 1.5,
                     }}
                   >
-                    Awaiting personal photos. Drag & drop your photos here, or click <strong>Import Photos</strong> to showcase hackathons, tech talks, workstation, and life moments.
-                  </p>
+                    <Trash2 size={36} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1D1D1F', margin: 0 }}>
+                      No Recently Deleted Photos
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: '#8E8E93',
+                        maxWidth: 420,
+                        marginTop: 6,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Photos and videos show the days remaining before permanent deletion. After that time, items will be permanently deleted.
+                    </p>
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => fileInputRef.current?.click()}
+              ) : (
+                /* Authentic macOS Empty Library State */
+                <div
                   style={{
+                    height: '80%',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 8,
-                    padding: '8px 18px',
-                    borderRadius: 8,
-                    backgroundColor: '#007AFF',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(0, 122, 255, 0.28)',
+                    justifyContent: 'center',
+                    gap: 16,
+                    textAlign: 'center',
+                    padding: '0 20px',
                   }}
                 >
-                  <Upload size={14} />
-                  <span>Import Photos</span>
-                </button>
-              </div>
+                  <div
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: 18,
+                      backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#007AFF',
+                    }}
+                  >
+                    <Camera size={36} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1D1D1F', margin: 0 }}>
+                      Yamin&apos;s Photo Library
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: '#8E8E93',
+                        maxWidth: 420,
+                        marginTop: 6,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Awaiting personal photos. Drag & drop your photos here, or click <strong>Import Photos</strong> to showcase hackathons, tech talks, workstation, and life moments.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isImporting}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 18px',
+                      borderRadius: 8,
+                      backgroundColor: '#007AFF',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: isImporting ? 'default' : 'pointer',
+                      boxShadow: '0 2px 8px rgba(0, 122, 255, 0.28)',
+                    }}
+                  >
+                    {isImporting ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    <span>{isImporting ? 'Importing...' : 'Import Photos'}</span>
+                  </button>
+                </div>
+              )
             ) : (
               /* Photo Grid */
               <div
@@ -1228,6 +1583,17 @@ export default function Photos() {
                         soundEngine.play('pop')
                         setViewingPhotoId(item.id)
                       }}
+                      onContextMenu={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        soundEngine.play('click')
+                        setSelectedPhotoId(item.id)
+                        setContextMenu({
+                          x: e.clientX,
+                          y: e.clientY,
+                          photo: item,
+                        })
+                      }}
                       style={{
                         position: 'relative',
                         aspectRatio: '1 / 1',
@@ -1246,6 +1612,9 @@ export default function Photos() {
                       <img
                         src={item.src}
                         alt={item.title}
+                        onError={(e) => {
+                          e.currentTarget.style.opacity = '0.4'
+                        }}
                         style={{
                           width: '100%',
                           height: '100%',
@@ -1298,27 +1667,49 @@ export default function Photos() {
                         </div>
                       )}
 
-                      {/* Favorite Heart (Hover / Active) */}
-                      <div
-                        onClick={(e) => toggleFavorite(item.id, e)}
-                        style={{
-                          position: 'absolute',
-                          bottom: 6,
-                          left: 6,
-                          opacity: item.isFavorite ? 1 : 0.8,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))',
-                        }}
-                      >
-                        <Heart
-                          size={14}
-                          color="#FFFFFF"
-                          fill={item.isFavorite ? '#FF2D55' : 'transparent'}
-                        />
-                      </div>
+                      {/* Recently Deleted: Days Badge (e.g. 29d) */}
+                      {item.isDeleted && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            bottom: 6,
+                            right: 6,
+                            padding: '2px 5px',
+                            borderRadius: 3,
+                            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                            backdropFilter: 'blur(8px)',
+                            color: '#FFFFFF',
+                            fontSize: 9.5,
+                            fontWeight: 600,
+                          }}
+                        >
+                          29d
+                        </div>
+                      )}
+
+                      {/* Favorite Heart (Hover / Active) - only shown when not deleted */}
+                      {!item.isDeleted && (
+                        <div
+                          onClick={(e) => toggleFavorite(item.id, e)}
+                          style={{
+                            position: 'absolute',
+                            bottom: 6,
+                            left: 6,
+                            opacity: item.isFavorite ? 1 : 0.8,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))',
+                          }}
+                        >
+                          <Heart
+                            size={14}
+                            color="#FFFFFF"
+                            fill={item.isFavorite ? '#FF2D55' : 'transparent'}
+                          />
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -1398,6 +1789,87 @@ export default function Photos() {
                 <span style={{ color: '#8E8E93' }}>Album: </span>
                 <span style={{ textTransform: 'capitalize' }}>{selectedPhoto.album}</span>
               </div>
+
+              {/* Inspector Bottom Actions: Delete & Put Back */}
+              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {!selectedPhoto.isDeleted ? (
+                  <button
+                    onClick={() => {
+                      setDeleteModal({
+                        isOpen: true,
+                        photo: selectedPhoto,
+                        isPermanent: false,
+                      })
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      padding: '6px 12px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255, 59, 48, 0.25)',
+                      backgroundColor: 'rgba(255, 59, 48, 0.08)',
+                      color: '#FF3B30',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete Photo</span>
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleRecoverPhoto(selectedPhoto.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        border: '1px solid rgba(0, 122, 255, 0.3)',
+                        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                        color: '#007AFF',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <RotateCcw size={13} />
+                      <span>Put Back to Library</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeleteModal({
+                          isOpen: true,
+                          photo: selectedPhoto,
+                          isPermanent: true,
+                        })
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        border: '1px solid rgba(255, 59, 48, 0.3)',
+                        backgroundColor: '#FF3B30',
+                        color: '#FFFFFF',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={13} />
+                      <span>Delete Immediately</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -1460,16 +1932,59 @@ export default function Photos() {
 
               {/* Action Buttons */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                {viewingPhoto.isDeleted && (
+                  <button
+                    onClick={() => handleRecoverPhoto(viewingPhoto.id)}
+                    title="Put Back to Library"
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#007AFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <RotateCcw size={14} />
+                    <span>Put Back</span>
+                  </button>
+                )}
+                {!viewingPhoto.isDeleted && (
+                  <button
+                    onClick={() => toggleFavorite(viewingPhoto.id)}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: viewingPhoto.isFavorite ? '#FF2D55' : '#FFFFFF',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Heart size={16} fill={viewingPhoto.isFavorite ? '#FF2D55' : 'none'} />
+                  </button>
+                )}
                 <button
-                  onClick={() => toggleFavorite(viewingPhoto.id)}
+                  onClick={() =>
+                    setDeleteModal({
+                      isOpen: true,
+                      photo: viewingPhoto,
+                      isPermanent: activeSection === 'recently-deleted',
+                    })
+                  }
+                  title={activeSection === 'recently-deleted' ? 'Delete Immediately' : 'Delete Photo (⌫)'}
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    color: viewingPhoto.isFavorite ? '#FF2D55' : '#FFFFFF',
+                    color: '#FF453A',
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  <Heart size={16} fill={viewingPhoto.isFavorite ? '#FF2D55' : 'none'} />
+                  <Trash2 size={16} />
                 </button>
                 <button
                   onClick={() => soundEngine.play('click')}
@@ -1612,6 +2127,56 @@ export default function Photos() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* ─── 5. PHOTOS CONTEXT MENU (RIGHT CLICK) ─────────────────────────── */}
+      {contextMenu && (
+        <PhotosContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          photo={contextMenu.photo}
+          isRecentlyDeleted={contextMenu.photo.isDeleted}
+          onClose={() => setContextMenu(null)}
+          onOpen={(photo) => setViewingPhotoId(photo.id)}
+          onGetInfo={(photo) => {
+            setSelectedPhotoId(photo.id)
+            setIsInspectorOpen(true)
+          }}
+          onToggleFavorite={(photo) => toggleFavorite(photo.id)}
+          onDuplicate={(photo) => handleDuplicatePhoto(photo)}
+          onDelete={(photo) =>
+            setDeleteModal({
+              isOpen: true,
+              photo,
+              isPermanent: false,
+            })
+          }
+          onRecover={(photo) => handleRecoverPhoto(photo.id)}
+          onDeletePermanent={(photo) =>
+            setDeleteModal({
+              isOpen: true,
+              photo,
+              isPermanent: true,
+            })
+          }
+        />
+      )}
+
+      {/* ─── 6. MACOS DELETE CONFIRMATION MODAL ────────────────────────────── */}
+      <PhotosDeleteModal
+        isOpen={deleteModal.isOpen}
+        photo={deleteModal.photo}
+        isPermanent={deleteModal.isPermanent}
+        isMultiple={deleteModal.isMultiple}
+        count={deleteModal.count}
+        onClose={() => setDeleteModal({ isOpen: false, photo: null, isPermanent: false })}
+        onConfirm={() => {
+          if (deleteModal.isMultiple) {
+            handleEmptyTrash()
+          } else if (deleteModal.photo) {
+            executeDeletePhoto(deleteModal.photo.id, deleteModal.isPermanent)
+          }
+        }}
+      />
     </div>
   )
 }

@@ -369,7 +369,7 @@ export function analyzeJobDescription(rawJD: string): JDAnalysisResult {
       label: 'Email Yamin Hossain',
       icon: 'email',
       actionType: 'contact',
-      payload: 'yamindr@gamil.com',
+      payload: 'yamindr@gmail.com',
     },
   ]
 

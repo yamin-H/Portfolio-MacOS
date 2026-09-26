@@ -13,7 +13,7 @@ Currently open to early-stage remote teams who want someone to own
 hard problems from day one.
 
 ## Contact
-- Email: available on request
+- Email: yamindr@gmail.com
 - GitHub: github.com/yamin
 - LinkedIn: linkedin.com/in/yamin`,
 

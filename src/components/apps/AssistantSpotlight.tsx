@@ -8,6 +8,7 @@ import { ChatMessage, ActionPill } from '@/lib/agent/types'
 import { generateAgentResponse } from '@/lib/agent/engine'
 import MarkdownRenderer from './assistant/MarkdownRenderer'
 import JDAnalyzerView from './JDAnalyzerView'
+import MacSpotlightView from './spotlight/MacSpotlightView'
 
 // ─── Quick Suggestion Chips ───────────────────────────────────────────────────
 
@@ -100,6 +101,9 @@ export default function AssistantSpotlight() {
       }
 
       if (e.key === 'Escape' && useWindowStore.getState().isAssistantOpen) {
+        if (useWindowStore.getState().assistantMode === 'search') {
+          return
+        }
         e.preventDefault()
         useWindowStore.getState().closeAssistant()
       }
@@ -145,7 +149,7 @@ export default function AssistantSpotlight() {
     setActiveStreamingText('')
 
     try {
-      // 1. Call API route (which uses Groq Cloud Llama 3.3 when configured, or local RAG)
+      // 1. Call API route (which uses Groq Cloud GPT-OSS 120B when configured, or local RAG)
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -232,6 +236,10 @@ export default function AssistantSpotlight() {
 
   if (!isAssistantOpen) return null
 
+  if (assistantMode === 'search') {
+    return <MacSpotlightView />
+  }
+
   return (
     <AnimatePresence>
       <div
@@ -241,8 +249,6 @@ export default function AssistantSpotlight() {
           inset: 0,
           zIndex: 9998,
           backgroundColor: 'rgba(0, 0, 0, 0.45)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
@@ -393,7 +399,7 @@ export default function AssistantSpotlight() {
                   >
                     {assistantMode === 'chat'
                       ? providerInfo.hasGroqKey
-                        ? '🟢 GROQ LLM (LLAMA 3.3)'
+                        ? '🟢 GROQ LLM (GPT-OSS 120B)'
                         : 'RAG AGENT'
                       : 'KILLER FEATURE'}
                   </span>
@@ -411,6 +417,27 @@ export default function AssistantSpotlight() {
                     gap: '2px',
                   }}
                 >
+                  <button
+                    onClick={() => setAssistantMode('search')}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '7px',
+                      padding: '4px 10px',
+                      color: 'rgba(255, 255, 255, 0.55)',
+                      fontSize: '11.5px',
+                      fontWeight: 400,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <span>🔍</span>
+                    <span>Search</span>
+                  </button>
+
                   <button
                     onClick={() => setAssistantMode('chat')}
                     style={{
@@ -656,7 +683,7 @@ export default function AssistantSpotlight() {
                               borderRadius: '6px',
                             }}
                           >
-                            {msg.model || (providerInfo.hasGroqKey ? 'Llama 3.3 70B' : 'Semantic RAG')}
+                            {msg.model || (providerInfo.hasGroqKey ? 'GPT-OSS 120B' : 'Semantic RAG')}
                           </span>
                         </div>
 
@@ -860,7 +887,7 @@ export default function AssistantSpotlight() {
             <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
               {assistantMode === 'chat'
                 ? providerInfo.hasGroqKey
-                  ? 'Groq Cloud LPU Active (Llama 3.3 70B)'
+                  ? 'Groq Cloud LPU Active (GPT-OSS 120B)'
                   : 'Apple Intelligence RAG Engine Active'
                 : 'Semantic JD Matcher Active'}
             </span>

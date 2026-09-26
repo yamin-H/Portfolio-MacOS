@@ -69,12 +69,7 @@ export default function Finder() {
     accentColor,
   } = useWindowStore()
 
-  const isDark =
-    appearanceMode === 'dark' ||
-    (appearanceMode === 'auto' &&
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const isDark = appearanceMode === 'dark'
   const accentHex = ACCENT_COLOR_MAP[accentColor]?.hex || '#007AFF'
 
   // ── Filesystem State ────────────────────────────────────────────────────────
