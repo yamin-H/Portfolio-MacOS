@@ -27,11 +27,13 @@ export async function POST(req: Request) {
   try {
     // ── 1. Security: Origin & Host Verification (Prevent CSRF / unauthorized cross-site hijacking) ──
     const origin = req.headers.get('origin')
-    const host = req.headers.get('host')
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host')
     if (origin && host) {
       try {
         const originHost = new URL(origin).host
-        if (originHost !== host && !originHost.includes('localhost') && !originHost.includes('127.0.0.1')) {
+        const isLocal = originHost.includes('localhost') || originHost.includes('127.0.0.1')
+        const isVercel = originHost.endsWith('.vercel.app')
+        if (originHost !== host && !isLocal && !isVercel) {
           return NextResponse.json({ error: 'Forbidden cross-origin request' }, { status: 403 })
         }
       } catch {
